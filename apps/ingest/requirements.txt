@@ -1,18 +1,15 @@
 # Ingestion Service Dependencies
 # --------------------------------
-# feedparser  : parse RSS/Atom feeds — battle-tested, handles edge cases
-#               across all major feed formats (RSS 0.9x, 1.0, 2.0, Atom).
-# httpx       : modern async-capable HTTP client for sending articles to the
-#               backend API. Cleaner API than requests, production-ready.
-# pydantic    : data validation for the internal article model.
-# pydantic-settings : load config from .env files (mirrors backend pattern).
-# python-dotenv : .env loading support (used by pydantic-settings).
-# python-dateutil : robust datetime parsing for RSS pubDate strings which
-#                   come in many non-standard formats across different feeds.
+# feedparser        : parse RSS/Atom feeds
+# rq                : Redis Queue — enqueue article_ingest jobs
+# redis             : Redis client (required by rq)
+# pydantic-settings : load config from .env files
+# python-dotenv     : .env loading support
+# python-dateutil   : robust RSS date string parsing
 
 feedparser>=6.0.11
-httpx>=0.27.0
-pydantic>=2.7.1
+rq>=1.16.0
+redis>=5.0.0
 pydantic-settings>=2.2.1
 python-dotenv>=1.0.1
 python-dateutil>=2.9.0

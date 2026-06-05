@@ -1,0 +1,23 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/pyright/main/packages/pyright/src/schema/pyrightconfig.schema.json",
+
+  "pythonVersion": "3.12",
+
+  "extraPaths": [
+    ".",
+    "apps/api",
+    "apps/ingest",
+    "apps"
+  ],
+
+  "reportMissingTypeStubs": "none",
+  "reportMissingModuleSource": "none",
+
+  "exclude": [
+    "**/venv/**",
+    "**/__pycache__/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**"
+  ]
+}

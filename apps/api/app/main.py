@@ -29,6 +29,7 @@ from app.database import Base, engine
 import app.models  # noqa: F401
 
 from app.routers import articles
+from app.routers import sentiment
 
 # ---------------------------------------------------------------------------
 # Create tables (development convenience — replace with Alembic in production)
@@ -53,6 +54,7 @@ app = FastAPI(
 # Routers
 # ---------------------------------------------------------------------------
 app.include_router(articles.router, prefix="/api/v1")
+app.include_router(sentiment.router)
 
 
 # ---------------------------------------------------------------------------

@@ -181,7 +181,18 @@ Phase 2 — Data Ingestion: ✓ COMPLETE
   ✓ Verified: 91 fetched → 91 transformed → 91 stored → 0 failed
   ✓ GET /api/v1/articles returns real financial news from live RSS feeds
 
-Phase 3 — Queue System (Redis): ⬜ PLANNED
+Phase 3 — Queue System (Redis): ✓ COMPLETE
+
+  ✓ Redis 8.8.0 installed (winget, taizod1024.redis-windows-fork)
+  ✓ packages/queue/ — shared queue package (connection, queue registry)
+  ✓ ingest/pipeline.py — now pushes to Redis queue (no more HTTP)
+  ✓ apps/worker/ — new worker service (SimpleWorker, Windows-compatible)
+  ✓ worker/jobs/article_job.py — writes directly to PostgreSQL (no HTTP)
+  ✓ Retry(max=3, interval=[10,30,60]) on failed jobs
+  ✓ Verified: 90 → queue → worker → DB confirmed via GET /articles
+  ✓ Run: redis-server | python apps/worker/run.py | python apps/ingest/run.py
+
+
 Phase 4 — Worker Pipelines: ⬜ PLANNED
 Phase 5 — Sentiment Processing: ⬜ PLANNED
 Phase 6 — Forecasting: ⬜ PLANNED

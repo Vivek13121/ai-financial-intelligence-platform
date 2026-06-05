@@ -1,28 +1,24 @@
 """
 config.py — Ingestion service settings.
 
-Why a separate config for ingest?
-  The ingest service is a standalone process — it does NOT import the backend
-  app package. It communicates with the backend exclusively over HTTP (POST
-  /api/v1/articles). Having its own config keeps the boundary clean and
-  means ingest can be deployed independently on a separate machine later.
+Phase 3 change:
+  The ingest service no longer POSTs directly to the API.
+  It pushes jobs to a Redis queue instead.
+  api_base_url and request_timeout_seconds have been removed.
+  redis_url has been added.
 
-Settings loaded here:
-  API_BASE_URL : where the backend API is running. Defaults to localhost
-                 during development. Override via environment variable or .env.
-  REQUEST_TIMEOUT_SECONDS : how long to wait for the API before giving up.
-  LOG_LEVEL : controls verbosity of console output.
+Settings:
+  REDIS_URL  : Redis connection URL. Read from the shared configs/.env.
+               Default: redis://localhost:6379 (local dev).
+  LOG_LEVEL  : Logging verbosity (DEBUG | INFO | WARNING | ERROR).
 """
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class IngestSettings(BaseSettings):
-    # Backend API target
-    api_base_url: str = "http://localhost:8000"
-
-    # HTTP client timeout when POSTing articles to the backend
-    request_timeout_seconds: int = 10
+    # Redis queue target — jobs are pushed here instead of directly to the API
+    redis_url: str = "redis://localhost:6379"
 
     # Logging verbosity: DEBUG | INFO | WARNING | ERROR
     log_level: str = "INFO"

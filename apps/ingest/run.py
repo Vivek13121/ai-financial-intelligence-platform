@@ -1,29 +1,21 @@
 """
-run.py — Manual entry point for the ingestion service.
+run.py — Manual entry point for the ingestion service (Phase 3).
 
 Usage:
     # From apps/ingest/ directory:
     python run.py
 
-    # With custom log level:
+    # With verbose output:
     LOG_LEVEL=DEBUG python run.py
 
-    # Targeting a different backend:
-    API_BASE_URL=http://staging-api:8000 python run.py
+Phase 3 change:
+  Summary now shows 'Queued' instead of 'Stored'.
+  The ingest service no longer stores articles — it pushes jobs to Redis.
+  The worker service (apps/worker/) is responsible for storage.
 
-Why a separate run.py?
-  - Keeps the ingest/ package importable without side effects.
-    (importing ingest.pipeline does not trigger a run)
-  - Clear, single entry point — anyone reading the code knows
-    exactly where manual execution starts.
-  - Easy to wrap with a cron job, task scheduler, or queue consumer
-    in later phases without touching any business logic.
-
-Logging setup:
-  We configure the root logger here (only in the entry point).
-  Library modules use getLogger(__name__) — they inherit the root config.
-  Setting it only in run.py ensures logging is never double-configured
-  when pipeline.py is imported by other callers (e.g., a queue worker).
+Workflow:
+  Terminal 1:  cd apps/worker && python run.py    ← start worker first
+  Terminal 2:  cd apps/ingest && python run.py    ← then run ingest
 """
 
 import logging
@@ -38,8 +30,7 @@ def setup_logging() -> None:
     Configure root logger for the ingestion process.
 
     Format includes timestamp, level, and logger name so log lines
-    are traceable to the exact module that produced them — essential
-    when debugging multi-layer pipelines.
+    are traceable to the exact module that produced them.
     """
     log_level = getattr(logging, settings.log_level.upper(), logging.INFO)
 
@@ -57,7 +48,7 @@ def main() -> None:
     logger = logging.getLogger(__name__)
     logger.info("=" * 60)
     logger.info("AI Financial Intelligence Platform — Ingestion Service")
-    logger.info("Backend API: %s", settings.api_base_url)
+    logger.info("Redis: %s", settings.redis_url)
     logger.info("=" * 60)
 
     result = run()
@@ -66,13 +57,16 @@ def main() -> None:
     logger.info("Run Summary")
     logger.info("  Fetched     : %d", result.fetched)
     logger.info("  Transformed : %d", result.transformed)
-    logger.info("  Stored      : %d", result.stored)
+    logger.info("  Queued      : %d", result.queued)
     logger.info("  Failed      : %d", result.failed)
     logger.info("=" * 60)
 
-    # Exit with non-zero code if everything failed (useful for CI/CD checks)
-    if result.transformed > 0 and result.stored == 0:
-        logger.error("All articles failed to store. Check backend API connectivity.")
+    # Exit non-zero if everything failed to enqueue
+    if result.transformed > 0 and result.queued == 0:
+        logger.error(
+            "All articles failed to enqueue. "
+            "Is Redis running? (redis-server)"
+        )
         sys.exit(1)
 
 

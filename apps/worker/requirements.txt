@@ -1,0 +1,21 @@
+# Worker Service Dependencies
+# --------------------------------
+# rq               : Redis Queue worker — consumes article_ingest + sentiment_process jobs
+# redis            : Redis client (required by rq)
+# sqlalchemy       : ORM for direct PostgreSQL writes (same version as API)
+# psycopg2-binary  : PostgreSQL adapter for SQLAlchemy
+# pydantic         : ArticleCreate / SentimentResultCreate schema validation
+# pydantic-settings: load DATABASE_URL, REDIS_URL from configs/.env
+# python-dotenv    : .env file support
+# transformers     : HuggingFace — loads ProsusAI/finbert for sentiment analysis
+# torch            : required by transformers for model inference
+
+rq>=1.16.0
+redis>=5.0.0
+sqlalchemy>=2.0.30
+psycopg2-binary>=2.9.9
+pydantic>=2.7.1
+pydantic-settings>=2.2.1
+python-dotenv>=1.0.1
+transformers==4.44.0
+torch>=2.2.0
