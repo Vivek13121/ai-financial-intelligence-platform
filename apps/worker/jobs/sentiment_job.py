@@ -30,8 +30,8 @@ Model loading strategy:
 
   FinBERT truncation:
     BERT-based models have a hard limit of 512 tokens (~380 words).
-    We pass article.content[:2000] characters (covers most lead paragraphs)
-    and let the tokenizer handle truncation automatically with truncation=True.
+    We pass the full article content and let the tokenizer handle truncation
+    automatically with truncation=True and max_length=512.
     The headline/lead paragraph carries the strongest sentiment signal.
 
 Retry behaviour:
@@ -52,10 +52,8 @@ logger = logging.getLogger(__name__)
 _SENTIMENT_PIPELINE: Optional[object] = None
 
 _FINBERT_MODEL = "ProsusAI/finbert"
-# Maximum characters of article content to pass to the model.
-# BERT tokenises differently from characters but ~2000 chars ≈ 512 tokens
-# for typical English financial text.
-_MAX_CONTENT_CHARS = 2000
+# Maximum tokens to pass to the model.
+_MAX_TOKENS = 512
 
 
 def _get_sentiment_pipeline():
@@ -79,8 +77,9 @@ def _get_sentiment_pipeline():
         _SENTIMENT_PIPELINE = hf_pipeline(
             task="text-classification",
             model=_FINBERT_MODEL,
-            # truncation=True: silently truncate inputs exceeding 512 tokens.
+            # Let the tokenizer handle truncation to max_length.
             truncation=True,
+            max_length=_MAX_TOKENS,
             # top_k=1: return only the highest-confidence label.
             top_k=1,
         )
@@ -104,7 +103,7 @@ def run_sentiment_job(article_id: str) -> None:
 
     Steps:
       1. Fetch the article from DB.
-      2. Run FinBERT on article.title + " " + article.content[:2000].
+      2. Run FinBERT on article.title + ". " + article.content.
       3. Parse the label and score from the pipeline output.
       4. Store the result in sentiment_results via CRUD.
 
@@ -134,7 +133,8 @@ def run_sentiment_job(article_id: str) -> None:
         # --- Build input text ---
         # Combine title + content for richer context.
         # FinBERT handles both parts of a news article equally well.
-        text_input = f"{article.title}. {article.content}"[:_MAX_CONTENT_CHARS]
+        # We rely on the tokenizer for truncation.
+        text_input = f"{article.title}. {article.content}"
 
         # --- Run FinBERT ---
         nlp = _get_sentiment_pipeline()
