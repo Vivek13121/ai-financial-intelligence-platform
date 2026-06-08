@@ -20,7 +20,7 @@ Query parameter limits:
   proper pagination tokens.
 """
 
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
@@ -58,6 +58,7 @@ def create_article(
 def list_articles(
     skip: int = Query(default=0, ge=0, description="Number of records to skip"),
     limit: int = Query(default=20, ge=1, le=100, description="Max records to return"),
+    search: Optional[str] = Query(default=None, description="Search by title or company"),
     db: Session = Depends(get_db),
 ):
-    return crud.article.get_articles(db=db, skip=skip, limit=limit)
+    return crud.article.get_articles(db=db, skip=skip, limit=limit, search=search)

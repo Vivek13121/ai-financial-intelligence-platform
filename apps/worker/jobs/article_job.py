@@ -117,6 +117,13 @@ def store_article_job(article_dict: dict) -> None:
     # --- Persist to database ---
     db = SessionLocal()
     try:
+        # Check for duplicates before inserting
+        if article_in.article_url:
+            from app.models.article import Article
+            existing = db.query(Article).filter(Article.article_url == article_in.article_url).first()
+            if existing:
+                logger.info("Duplicate skipped: Article URL already exists: %s", article_in.article_url)
+                return
         article = crud.article.create_article(db=db, article_in=article_in)
         logger.info(
             "Stored article id=%s source=%r title=%r",

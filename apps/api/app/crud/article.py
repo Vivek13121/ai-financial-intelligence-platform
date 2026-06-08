@@ -16,7 +16,7 @@ Pagination in get_articles():
   Later we'll upgrade to keyset pagination for very large datasets.
 """
 
-from typing import List
+from typing import List, Optional
 
 from sqlalchemy.orm import Session
 
@@ -41,7 +41,7 @@ def create_article(db: Session, article_in: ArticleCreate) -> Article:
     return db_article
 
 
-def get_articles(db: Session, skip: int = 0, limit: int = 20) -> List[Article]:
+def get_articles(db: Session, skip: int = 0, limit: int = 20, search: Optional[str] = None) -> List[Article]:
     """
     Return a paginated list of articles ordered by creation time (newest first).
 
@@ -49,8 +49,17 @@ def get_articles(db: Session, skip: int = 0, limit: int = 20) -> List[Article]:
       skip:  number of rows to skip (for pagination offset).
       limit: maximum number of rows to return (capped in the router).
     """
+    query = db.query(Article)
+    
+    if search:
+        search_term = f"%{search}%"
+        query = query.filter(
+            (Article.title.ilike(search_term)) | 
+            (Article.company.ilike(search_term))
+        )
+        
     return (
-        db.query(Article)
+        query
         .order_by(Article.created_at.desc())
         .offset(skip)
         .limit(limit)

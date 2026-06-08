@@ -30,6 +30,10 @@ import app.models  # noqa: F401
 
 from app.routers import articles
 from app.routers import sentiment
+from app.routers import forecast
+from app.routers import analytics
+from app.routers import system
+from app.routers import intelligence
 
 # ---------------------------------------------------------------------------
 # Create tables (development convenience — replace with Alembic in production)
@@ -54,7 +58,11 @@ app = FastAPI(
 # Routers
 # ---------------------------------------------------------------------------
 app.include_router(articles.router, prefix="/api/v1")
-app.include_router(sentiment.router)
+app.include_router(sentiment.router, prefix="/api/v1")
+app.include_router(forecast.router, prefix="/api/v1")
+app.include_router(analytics.router, prefix="/api/v1")
+app.include_router(system.router, prefix="/api/v1")
+app.include_router(intelligence.router, prefix="/api/v1")
 
 
 # ---------------------------------------------------------------------------

@@ -34,6 +34,7 @@ from packages.queue.connection import get_redis_connection
 
 ARTICLE_INGEST_QUEUE_NAME    = "article_ingest"
 SENTIMENT_PROCESS_QUEUE_NAME = "sentiment_process"
+FORECAST_GENERATION_QUEUE_NAME = "forecast_generation"
 
 
 # ---------------------------------------------------------------------------
@@ -77,3 +78,20 @@ def get_sentiment_queue() -> rq.Queue:
         connection=conn,
         default_timeout=300,
     )
+
+
+def get_forecast_queue() -> rq.Queue:
+    """
+    Return an rq.Queue connected to the forecast_generation queue.
+
+    Called when we want to trigger a new forecast generation.
+    default_timeout is 300s because Prophet can take a few seconds to train
+    depending on the size of the dataset.
+    """
+    conn = get_redis_connection()
+    return rq.Queue(
+        name=FORECAST_GENERATION_QUEUE_NAME,
+        connection=conn,
+        default_timeout=300,
+    )
+

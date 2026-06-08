@@ -5,3 +5,4 @@
 
 from app.models.article import Article                  # noqa: F401
 from app.models.sentiment_result import SentimentResult  # noqa: F401
+from app.models.forecast_result import ForecastResult   # noqa: F401
