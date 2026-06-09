@@ -60,6 +60,7 @@ export interface TrendingCompany {
 }
 
 export interface AnalyticsStats {
+  window_used: string;
   total_articles: number;
   total_forecasts: number;
   market_sentiment_score: number;

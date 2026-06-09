@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { API } from "../lib/api";
-import { Activity, Server, TrendingUp, Zap, ArrowUpRight, ArrowDownRight, Clock, RefreshCw, BarChart2, CheckCircle2, Target, Percent } from "lucide-react";
-import { formatDistanceToNow, addHours } from "date-fns";
+import { Activity, Server, TrendingUp, Zap, Clock, RefreshCw, BarChart2, Target, Percent } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
 
 export function Dashboard() {
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
@@ -42,29 +42,30 @@ export function Dashboard() {
   const getMovementText = () => {
     if (!stats) return "Gathering data...";
     if (stats.sentiment_change > 0) {
-      return `Bullish Momentum ↑`;
+      return "Bullish Momentum Up";
     } else if (stats.sentiment_change < 0) {
-      return `Bearish Momentum ↓`;
+      return "Bearish Momentum Down";
     }
-    return "Stable Momentum →";
+    return "Stable Momentum";
   };
   
   const getMovementSubtext = () => {
     if (!stats) return "";
     if (stats.sentiment_change > 0) {
-      return `Market optimism increasing (+${stats.sentiment_change.toFixed(1)}%)`;
+      return `Market optimism increasing (+${stats.sentiment_change.toFixed(1)} sentiment points)`;
     } else if (stats.sentiment_change < 0) {
-      return `Negative sentiment accelerating (${stats.sentiment_change.toFixed(1)}%)`;
+      return `Negative sentiment accelerating (${stats.sentiment_change.toFixed(1)} sentiment points)`;
     }
     return "Minor movement detected";
   };
 
-  const getNextForecastTime = () => {
+  const getForecastFreshness = () => {
     if (!latestRun) return "Pending";
-    const generated = new Date(latestRun.generated_at);
-    const next = addHours(generated, 6);
-    return formatDistanceToNow(next, { addSuffix: true });
+    return formatDistanceToNow(new Date(latestRun.generated_at), { addSuffix: true });
   };
+
+  const forecastMetricClass = "bg-white/5 rounded-lg p-4 min-h-[112px] flex flex-col justify-center gap-3 border border-white/5";
+  const forecastLabelClass = "text-xs text-muted-foreground uppercase leading-tight";
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 pb-12 h-full">
@@ -182,38 +183,38 @@ export function Dashboard() {
         </div>
 
         {/* D) Forecast Intelligence Widget */}
-        <div className="glass-card rounded-xl p-6 lg:col-span-2 border-white/5 relative overflow-hidden">
+        <div className="glass-card rounded-xl p-6 lg:col-span-2 border-white/5 relative overflow-hidden flex flex-col">
           <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-primary/10 blur-3xl rounded-full pointer-events-none" />
-          <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-6 flex items-center gap-2">
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-5 flex items-center gap-2 relative z-10">
             <Zap className="w-4 h-4 text-amber-400" /> AI Forecast Intelligence
           </h3>
           
           {runsLoading ? (
-             <div className="h-24 flex items-center justify-center font-mono text-sm text-muted-foreground animate-pulse">Running Prophet Models...</div>
+             <div className="min-h-[112px] flex items-center justify-center font-mono text-sm text-muted-foreground animate-pulse relative z-10">Running Prophet Models...</div>
           ) : !latestRun ? (
-             <div className="h-24 flex items-center justify-center font-mono text-sm text-muted-foreground">No active forecast models running.</div>
+             <div className="min-h-[112px] flex items-center justify-center font-mono text-sm text-muted-foreground relative z-10">No active forecast models running.</div>
           ) : (
-              <div className="grid sm:grid-cols-4 gap-4 h-full">
-               <div className="bg-white/5 rounded-lg p-4 flex flex-col justify-between">
-                 <span className="text-xs text-muted-foreground uppercase">Forecast Direction</span>
-                 <span className={`text-xl font-bold ${latestRun.trend === 'Improving' ? 'text-emerald-400' : latestRun.trend === 'Declining' ? 'text-red-400' : 'text-slate-300'}`}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 relative z-10">
+               <div className={forecastMetricClass}>
+                 <span className={forecastLabelClass}>Forecast Direction</span>
+                 <span className={`text-xl font-bold leading-none ${latestRun.trend === 'Improving' ? 'text-emerald-400' : latestRun.trend === 'Declining' ? 'text-red-400' : 'text-slate-300'}`}>
                    {latestRun.trend === 'Improving' ? 'Bullish' : latestRun.trend === 'Declining' ? 'Bearish' : 'Neutral'}
                  </span>
                </div>
-               <div className="bg-white/5 rounded-lg p-4 flex flex-col justify-between">
-                 <span className="text-xs text-muted-foreground uppercase">Expected Change</span>
-                 <span className={`text-xl font-bold font-mono ${latestRun.trend === 'Improving' ? 'text-emerald-400' : latestRun.trend === 'Declining' ? 'text-red-400' : 'text-slate-300'}`}>
+               <div className={forecastMetricClass}>
+                 <span className={forecastLabelClass}>Expected Change</span>
+                 <span className={`text-xl font-bold font-mono leading-none ${latestRun.trend === 'Improving' ? 'text-emerald-400' : latestRun.trend === 'Declining' ? 'text-red-400' : 'text-slate-300'}`}>
                    {latestRun.trend === 'Improving' ? '+' : latestRun.trend === 'Declining' ? '-' : ''}{Math.abs(latestRun.average_sentiment - (stats?.market_sentiment_score || 50)).toFixed(1)}%
                  </span>
                </div>
-               <div className="bg-white/5 rounded-lg p-4 flex flex-col justify-between">
-                 <span className="text-xs text-muted-foreground uppercase">Confidence</span>
-                 <span className="text-xl font-bold text-amber-400">Medium</span>
+               <div className={forecastMetricClass}>
+                 <span className={forecastLabelClass}>Confidence</span>
+                 <span className="text-xl font-bold leading-none text-amber-400">Medium</span>
                </div>
-               <div className="bg-white/5 rounded-lg p-4 flex flex-col justify-between">
-                 <span className="text-xs text-muted-foreground uppercase">Forecast Freshness</span>
-                 <span className="text-sm font-bold flex items-center gap-1.5">
-                   <Clock className="w-3.5 h-3.5 text-muted-foreground" /> {latestRun ? `${formatDistanceToNow(new Date(latestRun.generated_at))} ago` : "Pending"}
+               <div className={forecastMetricClass}>
+                 <span className={forecastLabelClass}>Forecast Freshness</span>
+                 <span className="text-base font-bold leading-tight flex items-center gap-1.5 text-slate-200">
+                   <Clock className="w-3.5 h-3.5 shrink-0 text-muted-foreground" /> {getForecastFreshness()}
                  </span>
                </div>
              </div>
@@ -270,13 +271,3 @@ export function Dashboard() {
   );
 }
 
-function SentimentBadge({ sentiment }: { sentiment: string }) {
-  switch (sentiment.toLowerCase()) {
-    case 'positive':
-      return <span className="px-2 py-1 text-[10px] uppercase tracking-wider font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded">Bullish</span>;
-    case 'negative':
-      return <span className="px-2 py-1 text-[10px] uppercase tracking-wider font-bold bg-red-500/10 text-red-400 border border-red-500/20 rounded">Bearish</span>;
-    default:
-      return <span className="px-2 py-1 text-[10px] uppercase tracking-wider font-bold bg-slate-500/10 text-slate-400 border border-slate-500/20 rounded">Neutral</span>;
-  }
-}

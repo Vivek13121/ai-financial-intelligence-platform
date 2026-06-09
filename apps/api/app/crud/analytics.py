@@ -1,10 +1,121 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import func, desc
+from sqlalchemy import func
+from collections import Counter, defaultdict
 from datetime import datetime, timedelta
+import re
 
 from app.models.article import Article
 from app.models.sentiment_result import SentimentResult
 from app.models.forecast_result import ForecastResult
+
+ENTITY_PATTERN = re.compile(
+    r"\b(?:[A-Z][A-Za-z0-9&.-]+|[A-Z]{2,})(?:\s+(?:[A-Z][A-Za-z0-9&.-]+|[A-Z]{2,}))*\b"
+)
+
+ENTITY_STOP_WORDS = {
+    "A", "An", "And", "As", "At", "By", "For", "From", "How", "In", "Is",
+    "It", "New", "Of", "On", "Or", "The", "This", "To", "With", "Why",
+    "Market", "Markets", "News", "Stock", "Stocks", "Shares", "Update",
+    "Breaking", "Today", "Wall Street", "Dow Jones", "Nasdaq", "S&P",
+    "Reuters", "Bloomberg", "CNBC", "Yahoo Finance",
+    "AI", "Buy", "Sell", "Hold", "Strong Buy", "One", "Inc", "Corp",
+    "Corporation", "Company", "Ltd", "LLC", "PLC", "Monday", "Tuesday",
+    "Wednesday", "Thursday", "Friday", "Saturday", "Sunday",
+}
+
+GENERIC_TOPIC_WORDS = {
+    "best", "cheap", "stocks", "stock", "shares", "buy", "sell", "hold",
+    "beginner", "beginners", "retirement", "dividend", "dividends", "income",
+    "growth", "value", "ceo", "cfo", "analyst", "analysts", "market",
+    "markets", "earnings", "options", "portfolio", "watchlist", "lifts",
+    "raises", "cuts", "pt", "target", "rating",
+}
+
+ORGANIZATION_TERMS = {
+    "bank", "group", "holdings", "capital", "financial", "finance",
+    "technologies", "technology", "systems", "semiconductor",
+    "semiconductors", "therapeutics", "pharma", "biotech", "energy",
+    "motors", "airlines", "resources", "partners",
+}
+
+KNOWN_COMPANY_ALIASES = {
+    "Apple": ("Apple", "AAPL"),
+    "Microsoft": ("Microsoft", "MSFT"),
+    "Nvidia": ("Nvidia", "NVDA"),
+    "Tesla": ("Tesla", "TSLA"),
+    "Amazon": ("Amazon", "AMZN"),
+    "Alphabet": ("Alphabet", "Google", "GOOGL", "GOOG"),
+    "Meta": ("Meta", "Facebook", "META"),
+    "Netflix": ("Netflix", "NFLX"),
+    "Intel": ("Intel", "INTC"),
+    "AMD": ("AMD", "Advanced Micro Devices"),
+    "Broadcom": ("Broadcom", "AVGO"),
+    "Oracle": ("Oracle", "ORCL"),
+    "Salesforce": ("Salesforce", "CRM"),
+    "Adobe": ("Adobe", "ADBE"),
+    "IBM": ("IBM",),
+    "JPMorgan Chase": ("JPMorgan", "JPMorgan Chase", "JPM"),
+    "Bank of America": ("Bank of America", "BAC"),
+    "Goldman Sachs": ("Goldman Sachs", "GS"),
+    "Morgan Stanley": ("Morgan Stanley", "MS"),
+    "Walmart": ("Walmart", "WMT"),
+    "Target": ("Target", "TGT"),
+    "Costco": ("Costco", "COST"),
+    "Disney": ("Disney", "DIS"),
+    "Boeing": ("Boeing", "BA"),
+    "Ford": ("Ford", "F"),
+    "General Motors": ("General Motors", "GM"),
+    "Exxon Mobil": ("Exxon", "Exxon Mobil", "XOM"),
+    "Chevron": ("Chevron", "CVX"),
+    "Pfizer": ("Pfizer", "PFE"),
+    "Moderna": ("Moderna", "MRNA"),
+    "Eli Lilly": ("Eli Lilly", "LLY"),
+    "Novo Nordisk": ("Novo Nordisk", "NVO"),
+    "Palantir": ("Palantir", "PLTR"),
+    "Coinbase": ("Coinbase", "COIN"),
+    "Block": ("Block", "Square", "SQ"),
+    "PayPal": ("PayPal", "PYPL"),
+}
+
+
+def extract_title_entities(title: str | None) -> list[str]:
+    """
+    Temporary headline entity extractor for dashboard mentions.
+    Replace this helper when the dedicated NER/entity pipeline lands.
+    """
+    if not title:
+        return []
+
+    entities = []
+    seen = set()
+    title_lower = title.lower()
+
+    for canonical, aliases in KNOWN_COMPANY_ALIASES.items():
+        for alias in aliases:
+            if re.search(rf"\b{re.escape(alias.lower())}\b", title_lower):
+                entities.append(canonical)
+                seen.add(canonical)
+                break
+
+    for match in ENTITY_PATTERN.findall(title):
+        entity = match.strip(" .,-:;()[]{}")
+        if not entity or entity in ENTITY_STOP_WORDS:
+            continue
+        if " " not in entity:
+            continue
+        if any(word.lower() in GENERIC_TOPIC_WORDS for word in entity.split()):
+            continue
+        if any(canonical in entity and canonical != entity for canonical in seen):
+            continue
+        if not any(word.lower() in ORGANIZATION_TERMS for word in entity.split()):
+            continue
+        if len(entity) <= 2 and not entity.isupper():
+            continue
+        if entity not in seen:
+            entities.append(entity)
+            seen.add(entity)
+    return entities
+
 
 def get_sentiment_score(distribution) -> float:
     total = distribution["positive"] + distribution["negative"] + distribution["neutral"]
@@ -12,6 +123,84 @@ def get_sentiment_score(distribution) -> float:
         return 50.0
     score_val = ((distribution["positive"] * 1) + (distribution["negative"] * -1)) / total
     return (score_val + 1) * 50
+
+
+def get_trending_companies(db: Session, start_time: datetime, recent_start: datetime):
+    articles = (
+        db.query(Article.id, Article.title, Article.company)
+        .filter(
+            (
+                (Article.published_at != None) &
+                (Article.published_at >= start_time)
+            ) |
+            (
+                (Article.published_at == None) &
+                (Article.created_at >= start_time)
+            )
+        )
+        .all()
+    )
+
+    mentions = Counter()
+    article_ids_by_entity = defaultdict(set)
+    for article_id, title, company in articles:
+        candidates = []
+        if company:
+            candidates.append(company)
+        candidates.extend(extract_title_entities(title))
+
+        for entity in dict.fromkeys(candidates):
+            mentions[entity] += 1
+            article_ids_by_entity[entity].add(article_id)
+
+    trending_companies = []
+    for company, count in mentions.most_common(5):
+        article_ids = list(article_ids_by_entity[company])
+        company_recent_sentiments = (
+            db.query(SentimentResult.sentiment_label)
+            .filter(SentimentResult.article_id.in_(article_ids))
+            .filter(SentimentResult.processed_at >= recent_start)
+            .all()
+        )
+        c_recent_dist = {"positive": 0, "negative": 0, "neutral": 0}
+        for (label,) in company_recent_sentiments:
+            if label.lower() in c_recent_dist:
+                c_recent_dist[label.lower()] += 1
+        c_recent_score = get_sentiment_score(c_recent_dist)
+
+        company_past_sentiments = (
+            db.query(SentimentResult.sentiment_label)
+            .filter(SentimentResult.article_id.in_(article_ids))
+            .filter(SentimentResult.processed_at >= start_time)
+            .filter(SentimentResult.processed_at < recent_start)
+            .all()
+        )
+        c_past_dist = {"positive": 0, "negative": 0, "neutral": 0}
+        for (label,) in company_past_sentiments:
+            if label.lower() in c_past_dist:
+                c_past_dist[label.lower()] += 1
+        c_past_score = get_sentiment_score(c_past_dist) if company_past_sentiments else 50.0
+
+        direction = "flat"
+        if c_recent_score > c_past_score + 2:
+            direction = "up"
+        elif c_recent_score < c_past_score - 2:
+            direction = "down"
+
+        latest_sentiment = "neutral"
+        if c_recent_score > 60:
+            latest_sentiment = "positive"
+        elif c_recent_score < 40:
+            latest_sentiment = "negative"
+
+        trending_companies.append({
+            "company": company,
+            "mentions": count,
+            "sentiment": latest_sentiment,
+            "direction": direction
+        })
+
+    return trending_companies
 
 def get_stats(db: Session):
     now = datetime.utcnow()
@@ -90,65 +279,11 @@ def get_stats(db: Session):
 
     mood_change = sentiment_change 
 
-    # Trending companies in the window
-    trending_query = (
-        db.query(Article.company, func.count(Article.id).label('mentions'))
-        .filter(Article.company != None)
-        .filter(Article.created_at >= previous_start)
-        .group_by(Article.company)
-        .order_by(desc('mentions'))
-        .limit(5)
-        .all()
+    trending_companies = get_trending_companies(
+        db=db,
+        start_time=now - timedelta(days=7),
+        recent_start=recent_start,
     )
-    
-    trending_companies = []
-    for company, mentions in trending_query:
-        company_recent_sentiments = (
-            db.query(SentimentResult.sentiment_label)
-            .join(Article, SentimentResult.article_id == Article.id)
-            .filter(Article.company == company)
-            .filter(SentimentResult.processed_at >= recent_start)
-            .all()
-        )
-        c_recent_dist = {"positive": 0, "negative": 0, "neutral": 0}
-        for (label,) in company_recent_sentiments:
-            if label.lower() in c_recent_dist:
-                c_recent_dist[label.lower()] += 1
-        c_recent_score = get_sentiment_score(c_recent_dist)
-        
-        company_past_sentiments = (
-            db.query(SentimentResult.sentiment_label)
-            .join(Article, SentimentResult.article_id == Article.id)
-            .filter(Article.company == company)
-            .filter(SentimentResult.processed_at >= previous_start)
-            .filter(SentimentResult.processed_at < recent_start)
-            .all()
-        )
-        c_past_dist = {"positive": 0, "negative": 0, "neutral": 0}
-        for (label,) in company_past_sentiments:
-            if label.lower() in c_past_dist:
-                c_past_dist[label.lower()] += 1
-        
-        c_past_score = get_sentiment_score(c_past_dist) if company_past_sentiments else 50.0
-        
-        direction = "flat"
-        if c_recent_score > c_past_score + 2:
-            direction = "up"
-        elif c_recent_score < c_past_score - 2:
-            direction = "down"
-            
-        latest_sentiment = "neutral"
-        if c_recent_score > 60:
-            latest_sentiment = "positive"
-        elif c_recent_score < 40:
-            latest_sentiment = "negative"
-
-        trending_companies.append({
-            "company": company,
-            "mentions": mentions,
-            "sentiment": latest_sentiment,
-            "direction": direction
-        })
 
     return {
         "window_used": window_used,

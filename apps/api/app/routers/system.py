@@ -1,9 +1,10 @@
 import redis
-from rq import Queue, Worker
+import logging
+from rq import Worker
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from app.config import settings
 from app.database import get_db
@@ -17,6 +18,17 @@ router = APIRouter(
     tags=["System"],
 )
 
+logger = logging.getLogger(__name__)
+
+
+def _as_utc(dt: datetime | None) -> datetime | None:
+    if dt is None:
+        return None
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(timezone.utc)
+
+
 @router.get("/status", response_model=SystemStatus)
 def get_system_status(db: Session = Depends(get_db)):
     """
@@ -26,8 +38,11 @@ def get_system_status(db: Session = Depends(get_db)):
     queue_sizes = []
     active_workers = 0
     
+    redis_client = None
+
     try:
-        r = redis.Redis.from_url(settings.redis_url)
+        redis_client = redis.Redis.from_url(settings.redis_url)
+        r = redis_client
         r.ping()
         redis_status = "ok"
         
@@ -44,8 +59,8 @@ def get_system_status(db: Session = Depends(get_db)):
         workers = Worker.all(connection=r)
         active_workers = len(workers)
         
-    except Exception:
-        pass
+    except Exception as exc:
+        logger.warning("Redis status check failed: %s", exc)
 
     # DB logic
     db_status = "down"
@@ -53,14 +68,14 @@ def get_system_status(db: Session = Depends(get_db)):
     last_sentiment_time = None
     articles_per_hour = 0
     try:
-        # Just getting the last article ingest time
-        last_article = db.query(Article).order_by(Article.created_at.desc()).first()
-        if last_article:
-            last_activity = last_article.created_at
+        last_activity = db.query(func.max(Article.published_at)).scalar()
+        if last_activity is None:
+            last_activity = db.query(func.max(Article.created_at)).scalar()
+        last_activity = _as_utc(last_activity)
             
         last_sentiment = db.query(SentimentResult).order_by(SentimentResult.processed_at.desc()).first()
         if last_sentiment:
-            last_sentiment_time = last_sentiment.processed_at
+            last_sentiment_time = _as_utc(last_sentiment.processed_at)
             
         # Articles per hour (rolling 24h)
         yesterday = datetime.utcnow() - timedelta(days=1)
@@ -68,20 +83,19 @@ def get_system_status(db: Session = Depends(get_db)):
         articles_per_hour = recent_articles // 24
         
         db_status = "ok"
-    except Exception:
-        pass
+    except Exception as exc:
+        logger.warning("Database status check failed: %s", exc)
 
     worker_status = "ok" if active_workers > 0 else "down"
     
     scheduler_heartbeat = None
     if redis_status == "ok":
         try:
-            r = redis.Redis.from_url(settings.redis_url)
-            hb_str = r.get("scheduler:heartbeat")
+            hb_str = redis_client.get("scheduler:heartbeat") if redis_client else None
             if hb_str:
-                scheduler_heartbeat = datetime.fromisoformat(hb_str.decode("utf-8"))
-        except Exception:
-            pass
+                scheduler_heartbeat = _as_utc(datetime.fromisoformat(hb_str.decode("utf-8")))
+        except Exception as exc:
+            logger.warning("Scheduler heartbeat read failed: %s", exc)
 
     return {
         "status": "ok" if redis_status == "ok" and db_status == "ok" else "degraded",

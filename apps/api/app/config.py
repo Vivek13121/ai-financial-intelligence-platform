@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     # Database
     database_url: str
 
+    # Redis
+    redis_url: str = "redis://localhost:6379/0"
+
     # Application
     app_env: str = "development"
     debug: bool = True

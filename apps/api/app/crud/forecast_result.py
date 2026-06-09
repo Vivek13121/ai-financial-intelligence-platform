@@ -3,6 +3,7 @@ crud/forecast_result.py — Database operations for ForecastResult.
 """
 
 from typing import List
+from datetime import datetime, timedelta
 
 from sqlalchemy.orm import Session
 
@@ -39,58 +40,46 @@ def get_forecasts(
     )
 
 
-def get_latest_forecasts_batch(db: Session) -> List[ForecastResult]:
+def _get_latest_forecast_batch(db: Session) -> tuple[datetime | None, List[ForecastResult]]:
     """
-    Return all forecast records from the single most recent generation run.
-    This fetches the max(generated_at) and returns all rows with that timestamp.
+    Forecast workers insert one row per horizon date, so rows from a single run
+    can have slightly different generated_at values. Treat rows created within
+    one minute of the newest row as the latest batch until a batch_id exists.
     """
-    # 1. Find the maximum generated_at timestamp
     latest_record = (
         db.query(ForecastResult.generated_at)
         .order_by(ForecastResult.generated_at.desc())
         .first()
     )
-    
+
     if not latest_record:
-        return []
-        
+        return None, []
+
     latest_time = latest_record[0]
-    
-    # 2. Fetch all records generated at that exact time
-    return (
+    threshold = latest_time - timedelta(minutes=1)
+    records = (
         db.query(ForecastResult)
-        .filter(ForecastResult.generated_at == latest_time)
-        .order_by(ForecastResult.forecast_date.asc())
+        .filter(ForecastResult.generated_at >= threshold)
+        .order_by(ForecastResult.forecast_date.asc(), ForecastResult.generated_at.asc())
         .all()
     )
+    return latest_time, records
+
+
+def get_latest_forecasts_batch(db: Session) -> List[ForecastResult]:
+    """
+    Return all forecast records from the single most recent generation run.
+    This uses the same latest-run window as the Overview freshness card.
+    """
+    _, records = _get_latest_forecast_batch(db)
+    return records
 
 def get_recent_forecast_runs(db: Session, limit: int = 5):
     """
     Returns summary statistics of the most recent forecast runs.
     Uses only the absolute latest forecast batch.
     """
-    from datetime import timedelta
-    
-    latest_record = (
-        db.query(ForecastResult.generated_at)
-        .order_by(ForecastResult.generated_at.desc())
-        .first()
-    )
-    
-    if not latest_record:
-        return []
-        
-    latest_time = latest_record[0]
-    threshold = latest_time - timedelta(minutes=1)
-    
-    # Fetch records for the latest batch
-    records = (
-        db.query(ForecastResult)
-        .filter(ForecastResult.generated_at >= threshold)
-        .order_by(ForecastResult.forecast_date.asc())
-        .all()
-    )
-    
+    latest_time, records = _get_latest_forecast_batch(db)
     if not records:
         return []
         

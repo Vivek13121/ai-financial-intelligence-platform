@@ -16,6 +16,10 @@ Start-Process powershell -ArgumentList "-NoExit -Command `"`$env:PYTHONPATH='d:\
 Write-Host "Starting Main Worker..." -ForegroundColor Cyan
 Start-Process powershell -ArgumentList "-NoExit -Command `"`$env:PYTHONPATH='d:\ai sentiment analysis'; cd apps\worker; python run.py`""
 
+# Start Sentiment Worker
+Write-Host "Starting Sentiment Worker..." -ForegroundColor Cyan
+Start-Process powershell -ArgumentList "-NoExit -Command `"`$env:PYTHONPATH='d:\ai sentiment analysis'; cd apps\worker; python run_sentiment.py`""
+
 # Start Forecast Worker
 Write-Host "Starting Forecast Worker..." -ForegroundColor Cyan
 Start-Process powershell -ArgumentList "-NoExit -Command `"`$env:PYTHONPATH='d:\ai sentiment analysis'; cd apps\worker; python run_forecast.py`""
