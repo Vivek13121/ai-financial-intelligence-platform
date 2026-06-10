@@ -10,6 +10,7 @@ import {
   AreaChart, Area, PieChart, Pie, Cell, Legend
 } from "recharts";
 import { format, parseISO } from "date-fns";
+import { AISummaryCard } from "../components/AISummaryCard";
 
 export function Company() {
   const { name } = useParams<{ name: string }>();
@@ -176,6 +177,8 @@ export function Company() {
           </div>
         </div>
       </div>
+
+      <AISummaryCard companyName={intel.company_name} />
 
       {/* AI Insight Panel */}
       <div className="relative glass-card p-8 rounded-2xl overflow-hidden border-primary/30">

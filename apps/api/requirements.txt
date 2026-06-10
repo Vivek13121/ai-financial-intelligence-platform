@@ -9,3 +9,7 @@ psycopg2-binary==2.9.9
 # Config & Env
 pydantic-settings==2.2.1
 python-dotenv==1.0.1
+
+# AI & Caching
+google-genai==1.3.0
+redis==5.0.4

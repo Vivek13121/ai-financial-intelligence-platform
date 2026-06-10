@@ -1,4 +1,4 @@
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from pydantic import BaseModel
 from app.schemas.article import ArticleResponse
 from app.schemas.analytics import TimeSeriesDataPoint, SentimentDistribution
@@ -21,3 +21,15 @@ class CompanyIntelligence(BaseModel):
     insights: str
     sentiment_distribution: SentimentDistribution
     related_topics: List[str]
+
+class AISummaryResponse(BaseModel):
+    executive_summary: str
+    risks: List[str]
+    opportunities: List[str]
+    forecast_outlook: str
+    generated_at: Optional[str] = None
+
+class AISummaryStatusResponse(BaseModel):
+    is_cached: bool
+    generated_at: Optional[str] = None
+

@@ -141,6 +141,14 @@ export const API = {
   getSearchSuggestions: async (query: string): Promise<string[]> => {
     const res = await apiClient.get(`/intelligence/suggestions?q=${encodeURIComponent(query)}`);
     return res.data;
+  },
+  getCompanySummary: async (companyName: string): Promise<AISummaryResponse> => {
+    const res = await apiClient.get(`/intelligence/${encodeURIComponent(companyName)}/summary`);
+    return res.data;
+  },
+  checkCompanySummaryStatus: async (companyName: string): Promise<{ is_cached: boolean; generated_at?: string }> => {
+    const res = await apiClient.get(`/intelligence/${encodeURIComponent(companyName)}/summary/status`);
+    return res.data;
   }
 };
 
@@ -164,6 +172,13 @@ export interface CompanyIntelligence {
   insights: string;
   sentiment_distribution: SentimentDistribution;
   related_topics: string[];
+}
+
+export interface AISummaryResponse {
+  executive_summary: string;
+  risks: string[];
+  opportunities: string[];
+  forecast_outlook: string;
 }
 
 export interface TimeSeriesDataPoint {

@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     # Application
     app_env: str = "development"
     debug: bool = True
+    gemini_api_key: str = ""
 
     # API metadata
     app_name: str = "AI Financial Intelligence Platform"
