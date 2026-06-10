@@ -8,7 +8,6 @@ export function Layout() {
     { name: "Overview", href: "/", icon: LayoutDashboard },
     { name: "Live Feed", href: "/feed", icon: Rss },
     { name: "Analytics", href: "/analytics", icon: BarChart3 },
-    { name: "Forecasts", href: "/forecasts", icon: LineChart },
     { name: "Search", href: "/search", icon: Search },
   ];
 

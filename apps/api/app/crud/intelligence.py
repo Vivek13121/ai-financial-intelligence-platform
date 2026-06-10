@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
-from sqlalchemy import func, cast, Date, desc
+from sqlalchemy import func, cast, Date, desc, or_, String
 
 from app.models.article import Article
 from app.models.sentiment_result import SentimentResult
@@ -13,23 +13,52 @@ from app.schemas.intelligence import (
 from app.schemas.article import ArticleResponse
 
 def get_company_intelligence(db: Session, company_name: str) -> CompanyIntelligence:
-    # We use ILIKE for case-insensitive matching across multiple fields
-    search_term = f"%{company_name}%"
-    filter_cond = (
-        Article.company.ilike(search_term) | 
-        Article.title.ilike(search_term) | 
-        Article.content.ilike(search_term)
+    COMPANY_ALIASES = {
+        "google": ["google", "alphabet", "goog", "googl"],
+        "apple": ["apple", "aapl"],
+        "tesla": ["tesla", "tsla"],
+        "microsoft": ["microsoft", "msft"],
+        "amazon": ["amazon", "amzn"],
+        "nvidia": ["nvidia", "nvda"],
+        "meta": ["meta", "facebook", "fb"]
+    }
+    
+    c_lower = company_name.lower()
+    aliases = COMPANY_ALIASES.get(c_lower, [company_name])
+    
+    conditions = []
+    for alias in aliases:
+        term = f"%{alias}%"
+        conditions.append(Article.company.ilike(term))
+        conditions.append(Article.title.ilike(term))
+        conditions.append(Article.content.ilike(term))
+        
+    filter_cond = or_(*conditions)
+
+    # Deduplicate articles by URL (or ID if no URL) using a window function
+    subq = (
+        db.query(
+            Article.id,
+            func.row_number().over(
+                partition_by=func.coalesce(Article.article_url, cast(Article.id, String)),
+                order_by=Article.created_at.desc()
+            ).label("rn")
+        )
+        .filter(filter_cond)
+        .subquery()
     )
     
+    unique_articles_filter = Article.id.in_(db.query(subq.c.id).filter(subq.c.rn == 1))
+    
     # 1. Total Articles & Distribution
-    articles_query = db.query(Article).filter(filter_cond)
+    articles_query = db.query(Article).filter(unique_articles_filter)
     total_articles = articles_query.count()
     
     distribution = {"positive": 0, "negative": 0, "neutral": 0}
     sentiment_counts = (
         db.query(SentimentResult.sentiment_label, func.count(SentimentResult.id))
         .join(Article, SentimentResult.article_id == Article.id)
-        .filter(filter_cond)
+        .filter(unique_articles_filter)
         .group_by(SentimentResult.sentiment_label)
         .all()
     )
@@ -56,7 +85,7 @@ def get_company_intelligence(db: Session, company_name: str) -> CompanyIntellige
             func.count(SentimentResult.id).label("count")
         )
         .join(Article, SentimentResult.article_id == Article.id)
-        .filter(filter_cond)
+        .filter(unique_articles_filter)
         .filter(SentimentResult.processed_at >= start_date)
         .group_by(cast(SentimentResult.processed_at, Date), SentimentResult.sentiment_label)
         .all()
@@ -67,7 +96,7 @@ def get_company_intelligence(db: Session, company_name: str) -> CompanyIntellige
             cast(Article.created_at, Date).label("date"),
             func.count(Article.id).label("count")
         )
-        .filter(filter_cond)
+        .filter(unique_articles_filter)
         .filter(Article.created_at >= start_date)
         .group_by(cast(Article.created_at, Date))
         .all()

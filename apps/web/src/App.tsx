@@ -4,7 +4,6 @@ import { Layout } from "./components/Layout";
 import { Dashboard } from "./pages/Dashboard";
 import { LiveFeed } from "./pages/LiveFeed";
 import { Analytics } from "./pages/Analytics";
-import { Forecasts } from "./pages/Forecasts";
 import { Search } from "./pages/Search";
 import { Company } from "./pages/Company";
 
@@ -19,7 +18,6 @@ export default function App() {
             <Route index element={<Dashboard />} />
             <Route path="feed" element={<LiveFeed />} />
             <Route path="analytics" element={<Analytics />} />
-            <Route path="forecasts" element={<Forecasts />} />
             <Route path="search" element={<Search />} />
             <Route path="company/:name" element={<Company />} />
           </Route>
