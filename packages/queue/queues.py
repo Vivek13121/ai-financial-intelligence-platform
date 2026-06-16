@@ -35,6 +35,7 @@ from packages.queue.connection import get_redis_connection
 ARTICLE_INGEST_QUEUE_NAME    = "article_ingest"
 SENTIMENT_PROCESS_QUEUE_NAME = "sentiment_process"
 FORECAST_GENERATION_QUEUE_NAME = "forecast_generation"
+ENTITY_EXTRACTION_QUEUE_NAME = "entity_extraction"
 
 
 # ---------------------------------------------------------------------------
@@ -93,5 +94,23 @@ def get_forecast_queue() -> rq.Queue:
         name=FORECAST_GENERATION_QUEUE_NAME,
         connection=conn,
         default_timeout=300,
+    )
+
+
+def get_entity_queue() -> rq.Queue:
+    """
+    Return an rq.Queue connected to the entity_extraction queue.
+
+    Called by article_job (producer) after storing an article.
+    Called by the entity worker to declare which queue it listens on.
+
+    default_timeout is 120s — spaCy NER is fast (~10-50ms per article)
+    but model loading on first call can take a few seconds.
+    """
+    conn = get_redis_connection()
+    return rq.Queue(
+        name=ENTITY_EXTRACTION_QUEUE_NAME,
+        connection=conn,
+        default_timeout=120,
     )
 

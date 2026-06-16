@@ -23,3 +23,6 @@ torch>=2.2.0
 # Phase 5
 prophet
 pandas
+
+# Phase 7B - Entity Extraction
+spacy>=3.8.0

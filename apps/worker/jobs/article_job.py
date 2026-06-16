@@ -176,3 +176,25 @@ def store_article_job(article_dict: dict) -> None:
             article.id,
             exc,
         )
+
+    # --- Enqueue entity extraction job ---
+    try:
+        from packages.queue.queues import get_entity_queue
+        from rq import Retry as RqRetry
+
+        entity_queue = get_entity_queue()
+        entity_queue.enqueue(
+            "worker.jobs.entity_job.run_entity_job",
+            str(article.id),
+            retry=RqRetry(max=3, interval=[10, 30, 60]),
+            job_timeout=120,
+        )
+        logger.info("Enqueued entity extraction job for article_id=%s", article.id)
+    except Exception as exc:
+        logger.error(
+            "Failed to enqueue entity job for article_id=%s: %s "
+            "(article is stored; entity extraction can be retried manually)",
+            article.id,
+            exc,
+        )
+

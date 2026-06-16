@@ -24,6 +24,10 @@ Start-Process powershell -ArgumentList "-NoExit -Command `"`$env:PYTHONPATH='d:\
 Write-Host "Starting Forecast Worker..." -ForegroundColor Cyan
 Start-Process powershell -ArgumentList "-NoExit -Command `"`$env:PYTHONPATH='d:\ai sentiment analysis'; cd apps\worker; python run_forecast.py`""
 
+# Start Entity Worker
+Write-Host "Starting Entity Worker..." -ForegroundColor Cyan
+Start-Process powershell -ArgumentList "-NoExit -Command `"`$env:PYTHONPATH='d:\ai sentiment analysis'; cd apps\worker; python run_entity.py`""
+
 # Start Scheduler
 Write-Host "Starting Scheduler..." -ForegroundColor Cyan
 Start-Process powershell -ArgumentList "-NoExit -Command `"`$env:PYTHONPATH='d:\ai sentiment analysis'; cd apps\scheduler; python run.py`""
@@ -34,3 +38,4 @@ Start-Process powershell -ArgumentList "-NoExit -Command `"cd apps\web; npm run 
 
 Write-Host "All services started successfully in separate windows!" -ForegroundColor Green
 Write-Host "Frontend is running at http://localhost:5173" -ForegroundColor Yellow
+

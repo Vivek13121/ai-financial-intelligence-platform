@@ -416,48 +416,51 @@ def get_timeseries(db: Session, days: int = 30):
 def get_topics(db: Session, days: int = 7):
     """
     Returns top positive and negative topics based on average sentiment score.
-    Dynamically extracts capitalized entities from titles to avoid empty states.
+    Uses the new Entity Intelligence Layer.
     """
+    from app.models.entity import Entity
+    from app.models.article_entity import ArticleEntity
+    
     start_date = datetime.utcnow() - timedelta(days=days)
     
     records = (
         db.query(
-            Article.title,
-            Article.company,
+            Entity.name,
+            Entity.type,
             SentimentResult.sentiment_label
         )
-        .join(SentimentResult, SentimentResult.article_id == Article.id)
+        .join(ArticleEntity, ArticleEntity.entity_id == Entity.id)
+        .join(SentimentResult, SentimentResult.article_id == ArticleEntity.article_id)
         .filter(SentimentResult.processed_at >= start_date)
+        .filter(Entity.type.in_(["COMPANY", "TOPIC", "INDUSTRY", "ORGANIZATION"]))
         .all()
     )
     
-    import re
-    stop_words = {"the", "a", "an", "in", "on", "at", "to", "for", "of", "with", "by", "from", "and", "or", "but", "is", "are", "was", "were", "this", "that", "it"}
+    # Exclude generic verbs, adjectives, stopwords, days of week, months, and single-word sentiment terms
+    exclude_words = {
+        "today", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday",
+        "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec",
+        "january", "february", "march", "april", "june", "july", "august", "september", "october", "november", "december",
+        "falls", "rises", "hard", "pressure", "carnage", "signs", "soars", "plummets", "surges", "drops",
+        "good", "bad", "great", "terrible", "bullish", "bearish", "high", "low", "up", "down",
+        "stock", "stocks", "market", "markets", "shares", "investors", "wall street", "dow", "nasdaq",
+        "report", "earnings", "quarter", "revenue", "profit", "loss", "buy", "sell", "hold"
+    }
     
     topics_map = {}
     
-    def add_topic(topic, label):
-        if not topic: return
-        t = topic.strip()
-        if len(t) <= 3 or t.lower() in stop_words: return
-        
-        # Avoid common non-topic capitalized words often found in titles
-        if t.lower() in {"how", "why", "what", "when", "new", "update", "stocks", "market", "breaking", "news"}: return
-        
-        if t not in topics_map:
-            topics_map[t] = {"positive": 0, "negative": 0, "neutral": 0, "mentions": 0}
-        topics_map[t][label.lower()] += 1
-        topics_map[t]["mentions"] += 1
-
-    for title, company, label in records:
-        if company:
-            add_topic(company, label)
+    for entity_name, entity_type, label in records:
+        if not entity_name: 
+            continue
             
-        if title:
-            # Extract capitalized words as potential entities
-            words = re.findall(r'\b[A-Z][a-z]+\b', title)
-            for w in words:
-                add_topic(w, label)
+        t_lower = entity_name.lower().strip()
+        if len(t_lower) <= 2 or t_lower in exclude_words: 
+            continue
+        
+        if entity_name not in topics_map:
+            topics_map[entity_name] = {"positive": 0, "negative": 0, "neutral": 0, "mentions": 0}
+        topics_map[entity_name][label.lower()] += 1
+        topics_map[entity_name]["mentions"] += 1
 
     results = []
     for topic, data in topics_map.items():
@@ -483,13 +486,14 @@ def get_topics(db: Session, days: int = 7):
     if not filtered_results:
         filtered_results = results
 
-    positive_topics = [r for r in filtered_results if r["sentiment_score"] >= 50]
+    # We use strict > 50 and < 50 for bullish and bearish to avoid completely neutral topics
+    positive_topics = [r for r in filtered_results if r["sentiment_score"] > 50]
     negative_topics = [r for r in filtered_results if r["sentiment_score"] < 50]
     
-    positive_topics.sort(key=lambda x: x["sentiment_score"], reverse=True)
-    negative_topics.sort(key=lambda x: x["sentiment_score"]) # Lowest first
+    positive_topics.sort(key=lambda x: (x["sentiment_score"], x["mentions"]), reverse=True)
+    negative_topics.sort(key=lambda x: (x["sentiment_score"], -x["mentions"])) # Lowest score first, highest mentions tiebreaker
 
     return {
-        "positive": positive_topics[:5],
-        "negative": negative_topics[:5]
+        "positive": positive_topics[:10],
+        "negative": negative_topics[:10]
     }
