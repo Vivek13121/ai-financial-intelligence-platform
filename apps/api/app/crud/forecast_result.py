@@ -66,14 +66,6 @@ def _get_latest_forecast_batch(db: Session) -> tuple[datetime | None, List[Forec
     return latest_time, records
 
 
-def get_latest_forecasts_batch(db: Session) -> List[ForecastResult]:
-    """
-    Return all forecast records from the single most recent generation run.
-    This uses the same latest-run window as the Overview freshness card.
-    """
-    _, records = _get_latest_forecast_batch(db)
-    return records
-
 def get_recent_forecast_runs(db: Session, limit: int = 5):
     """
     Returns summary statistics of the most recent forecast runs.

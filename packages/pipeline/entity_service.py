@@ -68,11 +68,17 @@ COMPANY_ALIASES = {
     "google": ("Alphabet", "COMPANY", "GOOGL"),
     "googl": ("Alphabet", "COMPANY", "GOOGL"),
     "goog": ("Alphabet", "COMPANY", "GOOGL"),
+    "alphabet inc": ("Alphabet", "COMPANY", "GOOGL"),
+    "alphabet inc.": ("Alphabet", "COMPANY", "GOOGL"),
     "meta": ("Meta", "COMPANY", "META"),
     "meta platforms": ("Meta", "COMPANY", "META"),
     "facebook": ("Meta", "COMPANY", "META"),
     "netflix": ("Netflix", "COMPANY", "NFLX"),
     "nflx": ("Netflix", "COMPANY", "NFLX"),
+    "netease": ("NetEase", "COMPANY", "NTES"),
+    "ntes": ("NetEase", "COMPANY", "NTES"),
+    "netease inc": ("NetEase", "COMPANY", "NTES"),
+    "netease, inc.": ("NetEase", "COMPANY", "NTES"),
 
     # Semiconductors
     "intel": ("Intel", "COMPANY", "INTC"),
@@ -223,6 +229,24 @@ def _normalize_entity(text: str) -> Optional[tuple]:
     return None
 
 
+def _is_valid_entity(ent) -> bool:
+    """
+    Validate spaCy entities to reject action phrases and sentence fragments.
+    """
+    # Reject if any token is a verb (action phrase like "Bought Nvidia")
+    if any(token.pos_ == "VERB" for token in ent):
+        return False
+        
+    lower_text = ent.text.lower()
+    # Reject contextual keywords that bleed into NER
+    bad_keywords = {"stock", "shares", "options", "dividend", "earnings", "sell off", "optimism", "headlines", "news", "sinks", "surges", "jumps", "falls", "started"}
+    for word in bad_keywords:
+        if word in lower_text:
+            return False
+            
+    return True
+
+
 def extract_entities(title: str, content: str) -> list[dict]:
     """
     Extract entities from article title and content.
@@ -246,6 +270,7 @@ def extract_entities(title: str, content: str) -> list[dict]:
             return
 
         doc = nlp(text)
+        all_aliases = {**COMPANY_ALIASES, **ORGANIZATION_ALIASES}
 
         for ent in doc.ents:
             ent_text = ent.text.strip()
@@ -262,13 +287,28 @@ def extract_entities(title: str, content: str) -> list[dict]:
             if normalized:
                 canonical, etype, symbol = normalized
             elif ent.label_ in SPACY_LABEL_MAP:
-                # Accept spaCy's label if it's a type we care about
-                canonical = ent_text
-                etype = SPACY_LABEL_MAP[ent.label_]
-                symbol = None
-                # Skip very short unaliased entities (likely noise)
-                if len(canonical) <= 2:
-                    continue
+                # If it doesn't match an alias perfectly, check if it contains an alias substring
+                # This catches things like "Nvidia Blackwell" -> normalizes to "Nvidia"
+                text_lower = ent_text.lower()
+                found_alias = False
+                for alias_key, (acanonical, aetype, asymbol) in all_aliases.items():
+                    if len(alias_key) > 2 and re.search(r'\b' + re.escape(alias_key) + r'\b', text_lower):
+                        canonical, etype, symbol = acanonical, aetype, asymbol
+                        found_alias = True
+                        break
+                
+                if not found_alias:
+                    # Validate to reject action phrases and fragments
+                    if not _is_valid_entity(ent):
+                        continue
+                        
+                    # Accept spaCy's label if it's a type we care about
+                    canonical = ent_text
+                    etype = SPACY_LABEL_MAP[ent.label_]
+                    symbol = None
+                    # Skip very short unaliased entities (likely noise)
+                    if len(canonical) <= 2:
+                        continue
             else:
                 continue
 
@@ -288,7 +328,6 @@ def extract_entities(title: str, content: str) -> list[dict]:
         # Also do direct alias matching on the raw text (catches ticker symbols
         # and aliases that spaCy misses)
         text_lower = text.lower()
-        all_aliases = {**COMPANY_ALIASES, **ORGANIZATION_ALIASES}
         for alias_key, (canonical, etype, symbol) in all_aliases.items():
             # Only match multi-word aliases or tickers (skip single common words)
             if len(alias_key) <= 2 and not alias_key.isupper():

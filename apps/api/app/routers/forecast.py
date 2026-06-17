@@ -32,13 +32,7 @@ def read_forecasts(
     return crud.forecast_result.get_forecasts(db, skip=skip, limit=limit)
 
 
-@router.get("/latest", response_model=List[ForecastResultResponse])
-def read_latest_forecasts(db: Session = Depends(get_db)):
-    """
-    Retrieve ONLY the forecasts generated during the most recent forecasting run.
-    This gives the current "active" forecast curve (e.g. the next 7 days).
-    """
-    return crud.forecast_result.get_latest_forecasts_batch(db)
+
 
 from app.schemas.forecast_result import ForecastRunStats
 

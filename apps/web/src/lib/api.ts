@@ -79,14 +79,7 @@ export interface ActivityEvent {
   message: string;
 }
 
-export interface ForecastResult {
-  id: string;
-  forecast_date: string;
-  predicted_sentiment: number;
-  confidence_lower: number;
-  confidence_upper: number;
-  generated_at: string;
-}
+
 
 export const API = {
   getArticles: async (skip = 0, limit = 10, search = ""): Promise<Article[]> => {
@@ -99,10 +92,7 @@ export const API = {
     return res.data;
   },
 
-  getLatestForecasts: async (limit = 14): Promise<ForecastResult[]> => {
-    const res = await apiClient.get(`/forecast/latest?limit=${limit}`);
-    return res.data;
-  },
+
 
   getAnalyticsStats: async (): Promise<AnalyticsStats> => {
     const res = await apiClient.get("/analytics/stats");
