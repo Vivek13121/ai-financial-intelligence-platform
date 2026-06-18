@@ -291,7 +291,14 @@ export function Company() {
 
       {/* ── Forecast Chart ───────────────────────────────────────────────── */}
       <div className="card p-5 flex flex-col">
-        <h3 className="label-section mb-4">7-Day Sentiment Forecast</h3>
+        <div className="flex justify-between items-start mb-6">
+          <div>
+            <h3 className="text-[var(--color-positive)] font-semibold mb-1 text-sm">7-Day Model Forecast</h3>
+            <p className="text-[11px] text-muted-foreground">Prophet Time-Series Projection</p>
+          </div>
+          <span className="text-[10px] font-mono tracking-widest text-[var(--color-positive)] border border-[var(--color-positive)]/30 bg-[var(--color-positive)]/10 px-2.5 py-0.5 rounded">Active</span>
+        </div>
+        
         <div className="min-h-[200px]">
           {forecastData.length <= 1 ? (
             <div className="h-full flex items-center justify-center">
@@ -299,14 +306,13 @@ export function Company() {
             </div>
           ) : (
             <ResponsiveContainer width="100%" height={200}>
-              <AreaChart data={forecastData} margin={{ top: 4, right: 8, bottom: 0, left: -20 }}>
+              <AreaChart data={forecastData} margin={{ top: 4, right: 0, bottom: 0, left: 0 }}>
                 <defs>
                   <linearGradient id="forecastGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--color-accent)" stopOpacity={0.15} />
-                    <stop offset="95%" stopColor="var(--color-accent)" stopOpacity={0} />
+                    <stop offset="5%" stopColor="var(--color-positive)" stopOpacity={0.15} />
+                    <stop offset="95%" stopColor="var(--color-positive)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="2 4" stroke="rgba(255,255,255,0.04)" vertical={false} />
                 <XAxis
                   dataKey="formattedDate"
                   stroke="transparent"
@@ -315,20 +321,17 @@ export function Company() {
                   axisLine={false}
                 />
                 <YAxis
-                  stroke="transparent"
-                  tick={{ fill: "var(--color-neutral)", fontSize: 10 }}
-                  tickLine={false}
-                  axisLine={false}
+                  hide={true}
                   domain={[0, 100]}
                 />
                 <RechartsTooltip content={<CustomTooltip />} cursor={{ stroke: "rgba(255,255,255,0.06)", strokeWidth: 1 }} />
                 <Area
-                  type="monotone"
+                  type="linear"
                   dataKey="predicted_sentiment"
                   name="Forecast"
-                  stroke="var(--color-accent)"
+                  stroke="var(--color-positive)"
                   strokeWidth={2}
-                  strokeDasharray="5 4"
+                  strokeDasharray="4 4"
                   fillOpacity={1}
                   fill="url(#forecastGrad)"
                   dot={false}
