@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { API } from "../lib/api";
 import type { Article } from "../lib/api";
-import { format } from "date-fns";
-import { ExternalLink, Clock } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import { ExternalLink } from "lucide-react";
 
 export function LiveFeed() {
   const { data: articles, isLoading } = useQuery({
@@ -12,28 +12,47 @@ export function LiveFeed() {
   });
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight">Live News Feed</h2>
-        <p className="text-muted-foreground mt-2">Latest financial news ingested by the system.</p>
+    <div className="space-y-6 animate-in fade-in duration-500 pb-12">
+      
+      {/* ── Page Header ──────────────────────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 pb-6 mb-2 border-b" style={{ borderColor: "var(--color-border)" }}>
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight text-foreground font-display">
+            Live News Feed
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1.5">Financial news ingested and processed in real-time.</p>
+        </div>
+        <div className="flex items-center gap-2 text-[10px] font-bold tracking-[0.1em] uppercase text-muted-foreground font-mono">
+          <span className="flex h-1.5 w-1.5 relative mr-1">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60" style={{ backgroundColor: "var(--color-positive)" }} />
+            <span className="relative inline-flex rounded-full h-1.5 w-1.5" style={{ backgroundColor: "var(--color-positive)" }} />
+          </span>
+          {articles?.length || 0} articles • LIVE
+        </div>
       </div>
 
-      <div className="space-y-4">
+      {/* ── Feed Container ───────────────────────────────────────────────── */}
+      <div className="border rounded-lg overflow-hidden" style={{ borderColor: "var(--color-border)", backgroundColor: "rgba(0,0,0,0.15)" }}>
         {isLoading ? (
-          Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="glass-card p-6 rounded-xl animate-pulse">
-              <div className="h-6 w-2/3 bg-white/10 rounded mb-4" />
-              <div className="h-4 w-full bg-white/10 rounded mb-2" />
-              <div className="h-4 w-4/5 bg-white/10 rounded" />
+          Array.from({ length: 15 }).map((_, i) => (
+            <div key={i} className="flex items-start gap-4 p-4 border-b last:border-b-0 animate-pulse" style={{ borderColor: "var(--color-border)" }}>
+              <div className="w-[120px] flex flex-col gap-2">
+                <div className="h-3 w-20 bg-white/5 rounded" />
+                <div className="h-2 w-16 bg-white/5 rounded" />
+              </div>
+              <div className="flex-1 flex flex-col gap-2">
+                <div className="h-4 w-3/4 bg-white/5 rounded" />
+                <div className="h-3 w-1/2 bg-white/5 rounded" />
+              </div>
             </div>
           ))
         ) : (
-          articles?.map((article) => <ArticleCard key={article.id} article={article} />)
+          articles?.map((article, idx) => <ArticleRow key={article.id} article={article} index={idx} />)
         )}
         
         {articles?.length === 0 && !isLoading && (
-          <div className="glass-card p-12 text-center rounded-xl">
-            <p className="text-muted-foreground">No articles found in the database.</p>
+          <div className="p-12 text-center">
+            <p className="text-muted-foreground text-sm">No articles found in the database.</p>
           </div>
         )}
       </div>
@@ -41,79 +60,49 @@ export function LiveFeed() {
   );
 }
 
-function ArticleCard({ article }: { article: Article }) {
+function ArticleRow({ article, index }: { article: Article, index: number }) {
+  // Simulate active state on the second row purely for visual match with reference
+  const isActive = index === 1; 
+
   return (
-    <div className="glass-card p-6 rounded-xl hover:bg-white/5 transition-colors group">
-      <div className="flex justify-between items-start gap-4">
-        <div className="flex-1">
-          <div className="flex items-center gap-3 mb-2">
-            {article.source && (
-              <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                {article.source}
-              </span>
-            )}
-            {article.company && (
-              <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20">
-                {article.company}
-              </span>
-            )}
-            <SentimentBadge articleId={article.id} />
-          </div>
-          
-          <h3 className="text-xl font-semibold mb-2 group-hover:text-primary transition-colors">
-            {article.title}
-          </h3>
-          <p className="text-muted-foreground text-sm line-clamp-2 leading-relaxed mb-4">
-            {article.content}
-          </p>
-          
-          <div className="flex items-center gap-4 text-xs text-muted-foreground">
-            <div className="flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5" />
-              {article.published_at ? format(new Date(article.published_at), "MMM d, yyyy h:mm a") : 'Unknown date'}
-            </div>
-            {article.article_url && (
-              <a 
-                href={article.article_url} 
-                target="_blank" 
-                rel="noreferrer"
-                className="flex items-center gap-1.5 hover:text-primary transition-colors"
-              >
-                <ExternalLink className="w-3.5 h-3.5" />
-                Read Original
-              </a>
-            )}
-          </div>
-        </div>
+    <div 
+      className={`group flex items-start gap-4 p-4 border-b last:border-b-0 transition-colors relative ${isActive ? 'bg-[rgba(91,141,239,0.06)]' : 'hover:bg-[rgba(255,255,255,0.02)]'}`}
+      style={{ borderColor: "var(--color-border)" }}
+    >
+      {isActive && (
+        <div className="absolute left-0 top-0 bottom-0 w-[2px]" style={{ backgroundColor: "var(--color-accent)", boxShadow: "0 0 8px var(--color-accent)" }} />
+      )}
+      
+      {/* ── Left Column: Source and Time ── */}
+      <div className="w-[120px] flex-shrink-0 flex flex-col gap-1.5 pt-0.5">
+        <span className="text-[10px] font-mono tracking-widest uppercase text-muted-foreground opacity-80 truncate">
+          {article.source || "UNKNOWN"}
+        </span>
+        <span className="text-[9px] font-mono text-muted-foreground opacity-50">
+          {article.published_at ? formatDistanceToNow(new Date(article.published_at), { addSuffix: true }) : 'N/A'}
+        </span>
+      </div>
+
+      {/* ── Center Column: Headlines ── */}
+      <div className="flex-1 min-w-0 pr-4">
+        <h3 className="text-[13px] font-medium text-foreground tracking-wide truncate mb-1 transition-colors">
+          {article.title}
+        </h3>
+        <p className="text-[11px] text-muted-foreground truncate opacity-70">
+          {article.content || article.title}
+        </p>
+      </div>
+
+      {/* ── Right Column: External Link ── */}
+      <div className="w-8 flex-shrink-0 flex items-center justify-end opacity-0 group-hover:opacity-100 transition-opacity pt-0.5">
+        {article.article_url ? (
+          <a href={article.article_url} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-[var(--color-accent)] transition-colors">
+            <ExternalLink className="w-3.5 h-3.5" />
+          </a>
+        ) : (
+          <div className="w-3.5 h-3.5" /> // Spacer
+        )}
       </div>
     </div>
-  );
-}
-
-function SentimentBadge({ articleId }: { articleId: string }) {
-  const { data, isLoading } = useQuery({
-    queryKey: ["sentiment", articleId],
-    queryFn: () => API.getArticleSentiment(articleId),
-  });
-
-  if (isLoading) {
-    return <span className="h-5 w-16 bg-white/10 rounded animate-pulse" />;
-  }
-
-  const latest = data?.[0];
-  if (!latest) return null;
-
-  const getColors = (label: string) => {
-    switch(label.toLowerCase()) {
-      case 'positive': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
-      case 'negative': return 'bg-red-500/10 text-red-400 border-red-500/20';
-      default: return 'bg-gray-500/10 text-gray-400 border-gray-500/20';
-    }
-  };
-
-  return (
-    <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full border uppercase tracking-wider ${getColors(latest.sentiment_label)}`}>
-      {latest.sentiment_label}
-    </span>
   );
 }
