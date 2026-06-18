@@ -19,6 +19,7 @@ Pagination in get_articles():
 from typing import List, Optional
 
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 
 from app.models.article import Article
 from app.schemas.article import ArticleCreate
@@ -60,7 +61,7 @@ def get_articles(db: Session, skip: int = 0, limit: int = 20, search: Optional[s
         
     return (
         query
-        .order_by(Article.created_at.desc())
+        .order_by(func.coalesce(Article.published_at, Article.created_at).desc())
         .offset(skip)
         .limit(limit)
         .all()
