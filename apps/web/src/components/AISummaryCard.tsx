@@ -2,8 +2,9 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { API, type AISummaryResponse } from "../lib/api";
 import { 
-  BrainCircuit, AlertTriangle, Lightbulb, TrendingUp,
-  RefreshCw, Clock, CheckCircle2, ChevronDown, ChevronUp, AlertCircle
+  AlertTriangle, Lightbulb, TrendingUp,
+  RefreshCw, Clock, CheckCircle2, ChevronDown, ChevronUp, AlertCircle,
+  FileText, FileSearch
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -55,7 +56,7 @@ export function AISummaryCard({ companyName }: AISummaryCardProps) {
       <div className="flex items-start justify-between mb-6 relative z-10">
         <div className="flex items-center gap-4">
           <div className="p-3 rounded-xl" style={{ backgroundColor: "rgba(91,141,239,0.12)", border: "1px solid rgba(91,141,239,0.2)" }}>
-            <BrainCircuit className="w-6 h-6" style={{ color: "var(--color-accent)" }} />
+            <FileText className="w-6 h-6" style={{ color: "var(--color-accent)" }} />
           </div>
           <div>
             <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
@@ -109,7 +110,7 @@ export function AISummaryCard({ companyName }: AISummaryCardProps) {
             <div className="relative w-12 h-12 flex items-center justify-center">
               <div className="absolute inset-0 border-2 border-[var(--color-border)] rounded-full" />
               <div className="absolute inset-0 border-2 border-[var(--color-accent)] rounded-full border-t-transparent animate-spin" />
-              <BrainCircuit className="w-5 h-5 text-[var(--color-accent)] animate-pulse" />
+              <FileSearch className="w-5 h-5 text-[var(--color-accent)] animate-pulse" />
             </div>
             <div className="text-center">
               <p className="font-semibold text-foreground">Synthesizing Intelligence...</p>
@@ -119,7 +120,7 @@ export function AISummaryCard({ companyName }: AISummaryCardProps) {
         ) : !summary && !statusData?.is_cached ? (
           <div className="card-elevated p-8 flex flex-col items-center justify-center gap-5 text-center">
             <div className="p-4 rounded-full bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.05)]">
-              <BrainCircuit className="w-8 h-8 text-muted-foreground" />
+              <FileSearch className="w-8 h-8 text-muted-foreground" />
             </div>
             <div>
               <p className="text-foreground font-medium text-lg"></p>
@@ -140,7 +141,7 @@ export function AISummaryCard({ companyName }: AISummaryCardProps) {
             {/* Executive Summary */}
             <div className="space-y-2">
               <h4 className="label-section flex items-center gap-1.5">
-                <BrainCircuit className="w-3.5 h-3.5 text-[var(--color-accent)]" />
+                <FileText className="w-3.5 h-3.5 text-[var(--color-accent)]" />
                 Executive Summary
               </h4>
               <p className="text-sm text-foreground leading-relaxed opacity-90 pl-5 border-l-2 border-[var(--color-border)]">
