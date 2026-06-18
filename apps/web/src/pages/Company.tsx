@@ -322,7 +322,7 @@ export function Company() {
                 />
                 <YAxis
                   hide={true}
-                  domain={[0, 100]}
+                  domain={['dataMin - 5', 'dataMax + 5']}
                 />
                 <RechartsTooltip content={<CustomTooltip />} cursor={{ stroke: "rgba(255,255,255,0.06)", strokeWidth: 1 }} />
                 <Area
