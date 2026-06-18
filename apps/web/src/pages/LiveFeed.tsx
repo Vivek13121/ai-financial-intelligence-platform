@@ -61,17 +61,11 @@ export function LiveFeed() {
 }
 
 function ArticleRow({ article, index }: { article: Article, index: number }) {
-  // Simulate active state on the second row purely for visual match with reference
-  const isActive = index === 1; 
-
   return (
     <div 
-      className={`group flex items-start gap-4 p-4 border-b last:border-b-0 transition-colors relative ${isActive ? 'bg-[rgba(91,141,239,0.06)]' : 'hover:bg-[rgba(255,255,255,0.02)]'}`}
+      className="group flex items-start gap-4 p-4 border-b last:border-b-0 transition-colors relative hover:bg-[rgba(255,255,255,0.02)]"
       style={{ borderColor: "var(--color-border)" }}
     >
-      {isActive && (
-        <div className="absolute left-0 top-0 bottom-0 w-[2px]" style={{ backgroundColor: "var(--color-accent)", boxShadow: "0 0 8px var(--color-accent)" }} />
-      )}
       
       {/* ── Left Column: Source and Time ── */}
       <div className="w-[120px] flex-shrink-0 flex flex-col gap-1.5 pt-0.5">
