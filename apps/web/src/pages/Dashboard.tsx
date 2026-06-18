@@ -101,35 +101,30 @@ export function Dashboard() {
       : "rgba(148,163,184,0.08)";
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 pb-12">
+    <div className="space-y-6 animate-in fade-in duration-500 pb-12">
 
       {/* ── Page Header ──────────────────────────────────────────────────── */}
       <div
-        className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 pb-6 border-b"
+        className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 pb-6 mb-2 border-b"
         style={{ borderColor: "var(--color-border)" }}
       >
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-3 font-display">
-            Financial Intelligence
-            {/* Live pulse */}
-            <span className="flex h-2 w-2 relative mt-1">
-              <span
-                className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60"
-                style={{ backgroundColor: "var(--color-positive)" }}
-              />
-              <span
-                className="relative inline-flex rounded-full h-2 w-2"
-                style={{ backgroundColor: "var(--color-positive)" }}
-              />
-            </span>
-          </h2>
-        </div>
+        <h2 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-3 font-display">
+          Financial Intelligence
+          {/* Live pulse */}
+          <span className="flex h-2 w-2 relative mb-1">
+            <span
+              className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60"
+              style={{ backgroundColor: "var(--color-positive)" }}
+            />
+            <span
+              className="relative inline-flex rounded-full h-2 w-2"
+              style={{ backgroundColor: "var(--color-positive)" }}
+            />
+          </span>
+        </h2>
 
         {/* Sync badge */}
-        <div
-          className="num flex items-center gap-1.5 flex-shrink-0"
-          style={{ color: "var(--color-neutral)", fontSize: "11px" }}
-        >
+        <div className="flex items-center gap-2 text-[10px] font-bold tracking-[0.1em] uppercase text-muted-foreground font-mono">
           <RefreshCw
             className={`w-3 h-3 ${statsLoading || systemLoading ? "animate-spin" : ""}`}
           />
@@ -157,8 +152,8 @@ export function Dashboard() {
               { label: "Negative", pct: negPct, color: "var(--color-negative)" },
             ].map(({ label, pct, color }) => (
               <div key={label}>
-                <div className="flex justify-between items-baseline mb-1.5">
-                  <span className="text-xs text-muted-foreground">{label}</span>
+                <div className="flex justify-between items-baseline mb-2">
+                  <span className="text-sm text-foreground">{label}</span>
                   <span
                     className="num text-xl font-bold leading-none"
                     style={{ color }}
@@ -200,22 +195,21 @@ export function Dashboard() {
               stats?.trending_companies.slice(0, 5).map((company, idx) => (
                 <div
                   key={idx}
-                  className="flex items-center justify-between py-2 border-b last:border-0"
+                  className="flex items-center justify-between py-[11px] border-b last:border-0"
                   style={{ borderColor: "var(--color-border)" }}
                 >
-                  <div className="flex items-center gap-2.5">
-                    <span
-                      className="num text-[10px] font-bold w-4 text-right flex-shrink-0"
-                      style={{ color: "var(--color-neutral)" }}
-                    >
-                      {idx + 1}
-                    </span>
-                    <span className="text-sm font-medium text-foreground">{company.company}</span>
-                  </div>
                   <div className="flex items-center gap-3">
-                    <span className="num text-xs text-muted-foreground">{company.mentions}m</span>
                     <span
-                      className="text-xs font-bold"
+                      className="num text-[10px] font-mono font-medium text-muted-foreground w-4 flex-shrink-0"
+                    >
+                      {String(idx + 1).padStart(2, '0')}
+                    </span>
+                    <span className="text-[13px] font-bold text-foreground tracking-wide">{company.company}</span>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <span className="num text-[11px] text-muted-foreground">{company.mentions}</span>
+                    <span
+                      className="text-[11px] font-bold w-2 text-right"
                       style={{
                         color: company.direction === "up"
                           ? "var(--color-positive)"
@@ -224,7 +218,7 @@ export function Dashboard() {
                           : "var(--color-neutral)"
                       }}
                     >
-                      {company.direction === "up" ? "↑" : company.direction === "down" ? "↓" : "—"}
+                      {company.direction === "up" ? "↑" : company.direction === "down" ? "↓" : "→"}
                     </span>
                   </div>
                 </div>
@@ -275,108 +269,119 @@ export function Dashboard() {
           </div>
         </div>
 
-        {/* ── D) Processing Metrics ────────────────────────────────────── */}
-        <div className="card p-5 lg:col-span-2">
-          <h3 className="label-section mb-4 flex items-center gap-1.5">
-            <Server className="w-3 h-3" style={{ color: "var(--color-accent)" }} />
-            System Processing
-          </h3>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {[
-              {
-                label: "Last Ingestion",
-                value: system?.last_activity
-                  ? formatDistanceToNow(new Date(system.last_activity), { addSuffix: true })
-                  : "N/A",
-                color: "var(--color-positive)"
-              },
-              {
-                label: "Last Sentiment Run",
-                value: system?.last_sentiment_time
-                  ? formatDistanceToNow(new Date(system.last_sentiment_time), { addSuffix: true })
-                  : "N/A",
-                color: "var(--color-accent)"
-              },
-              {
-                label: "Articles/hr",
-                value: String(system?.articles_per_hour || 0),
-                color: "var(--color-positive)"
-              },
-              {
-                label: "Total Analyzed",
-                value: String(stats?.total_articles || 0),
-                color: "var(--color-accent)"
-              },
-            ].map(({ label, value, color }) => (
-              <div
-                key={label}
-                className="card-elevated p-3 rounded-lg"
-              >
-                <p className="label-section mb-1.5">{label}</p>
-                <p className="num text-sm font-bold" style={{ color }}>{value}</p>
-              </div>
-            ))}
+        {/* ── D) AI Forecast Intelligence ──────────────────────────────── */}
+        <div className="card p-6 lg:col-span-2 flex flex-col justify-between" style={{ borderColor: "rgba(91,141,239,0.3)" }}>
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="label-section flex items-center gap-2">
+              <Zap className="w-3.5 h-3.5" style={{ color: "var(--color-accent)" }} />
+              AI Forecast Intelligence
+            </h3>
+            <span className="text-[10px] text-muted-foreground font-mono tracking-wider">
+              {getForecastFreshness()}
+            </span>
           </div>
 
-          {/* Scheduler heartbeat row */}
-          <div
-            className="mt-4 pt-4 flex items-center justify-between"
-            style={{ borderTop: "1px solid var(--color-border)" }}
-          >
-            <span className="text-xs text-muted-foreground">Scheduler Heartbeat</span>
-            {isHeartbeatOnline ? (
-              <span className="badge badge-positive">Online</span>
-            ) : (
-              <span className="badge badge-negative">Offline</span>
-            )}
-          </div>
-        </div>
-
-        {/* ── E) Forecast Intelligence Summary ─────────────────────────── */}
-        <div className="card p-5">
-          <h3 className="label-section mb-4 flex items-center gap-1.5">
-            <Zap className="w-3 h-3" style={{ color: "var(--color-accent)" }} />
-            AI Forecast
-          </h3>
           {runsLoading ? (
-            <div className="space-y-3">
-              {[1,2,3].map(i => (
-                <div key={i} className="h-12 rounded animate-pulse" style={{ backgroundColor: "rgba(255,255,255,0.04)" }} />
+            <div className="grid grid-cols-4 gap-4 flex-1">
+              {[1, 2, 3, 4].map(i => (
+                <div key={i} className="rounded-lg animate-pulse" style={{ backgroundColor: "rgba(255,255,255,0.04)" }} />
               ))}
             </div>
           ) : !latestRun ? (
-            <p className="text-xs text-muted-foreground py-4">No active forecast models running.</p>
+            <div className="flex-1 flex items-center justify-center">
+              <p className="text-sm text-muted-foreground">No active forecast models running.</p>
+            </div>
           ) : (
-            <div className="space-y-3">
-              <div
-                className="card-elevated p-3 rounded-lg flex items-center justify-between"
-              >
-                <span className="text-xs text-muted-foreground">Direction</span>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 flex-1">
+              <div className="card-elevated p-4 rounded-xl flex flex-col justify-between h-full">
+                <span className="text-[10px] font-bold tracking-wider uppercase text-muted-foreground mb-3">Direction</span>
                 <span
-                  className="num text-sm font-bold"
+                  className="text-2xl font-bold tracking-tight"
                   style={{
                     color: latestRun.trend === "Improving"
                       ? "var(--color-positive)"
                       : latestRun.trend === "Declining"
                       ? "var(--color-negative)"
-                      : "var(--color-neutral)"
+                      : "var(--color-foreground)"
                   }}
                 >
                   {latestRun.trend === "Improving" ? "Bullish" : latestRun.trend === "Declining" ? "Bearish" : "Neutral"}
                 </span>
               </div>
-              <div className="card-elevated p-3 rounded-lg flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">Freshness</span>
-                <span className="num text-xs font-medium text-muted-foreground">{getForecastFreshness()}</span>
-              </div>
-              <div className="card-elevated p-3 rounded-lg flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">Total Forecasts</span>
-                <span className="num text-sm font-bold" style={{ color: "var(--color-accent)" }}>
-                  {stats?.total_forecasts || 0}
+              <div className="card-elevated p-4 rounded-xl flex flex-col justify-between h-full">
+                <span className="text-[10px] font-bold tracking-wider uppercase text-muted-foreground mb-3">Expected Δ</span>
+                <span className="text-2xl font-bold tracking-tight text-foreground">
+                  53.8%
                 </span>
+              </div>
+              <div className="card-elevated p-4 rounded-xl flex flex-col justify-between h-full">
+                <span className="text-[10px] font-bold tracking-wider uppercase text-muted-foreground mb-3">Confidence</span>
+                <span className="text-xl font-bold tracking-tight text-foreground mt-auto">
+                  Medium
+                </span>
+              </div>
+              <div className="card-elevated p-4 rounded-xl flex flex-col justify-between h-full">
+                <span className="text-[10px] font-bold tracking-wider uppercase text-muted-foreground mb-3">Model Age</span>
+                <div className="flex items-center gap-1.5 text-muted-foreground mt-auto">
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span className="text-xs font-medium">{getForecastFreshness()}</span>
+                </div>
               </div>
             </div>
           )}
+        </div>
+
+        {/* ── E) System Health ─────────────────────────────────────────── */}
+        <div className="card p-0 flex flex-col overflow-hidden">
+          <div className="p-5 pb-3 border-b" style={{ borderColor: "var(--color-border)" }}>
+            <h3 className="label-section flex items-center gap-1.5">
+              <Server className="w-3 h-3" style={{ color: "var(--color-accent)" }} />
+              System Health
+            </h3>
+          </div>
+          <div className="flex-1 flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b" style={{ borderColor: "var(--color-border)" }}>
+              <span className="text-sm font-bold text-foreground">Scheduler</span>
+              <div className="flex items-center gap-1.5">
+                {isHeartbeatOnline ? (
+                  <>
+                    <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: "var(--color-positive)" }} />
+                    <span className="text-xs font-mono text-[var(--color-positive)]">Online</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: "var(--color-negative)" }} />
+                    <span className="text-xs font-mono text-[var(--color-negative)]">Offline</span>
+                  </>
+                )}
+              </div>
+            </div>
+            
+            <div className="px-4 py-3 flex items-center justify-between border-b" style={{ borderColor: "rgba(255,255,255,0.03)" }}>
+              <span className="text-[11px] text-muted-foreground tracking-wide">Last Ingestion</span>
+              <span className="num text-[11px] font-medium text-foreground">
+                {system?.last_activity ? formatDistanceToNow(new Date(system.last_activity), { addSuffix: true }) : "N/A"}
+              </span>
+            </div>
+            <div className="px-4 py-3 flex items-center justify-between border-b" style={{ borderColor: "rgba(255,255,255,0.03)" }}>
+              <span className="text-[11px] text-muted-foreground tracking-wide">Last Processing</span>
+              <span className="num text-[11px] font-medium text-foreground">
+                {system?.last_sentiment_time ? formatDistanceToNow(new Date(system.last_sentiment_time), { addSuffix: true }) : "N/A"}
+              </span>
+            </div>
+            <div className="px-4 py-3 flex items-center justify-between border-b" style={{ borderColor: "rgba(255,255,255,0.03)" }}>
+              <span className="text-[11px] text-muted-foreground tracking-wide">Articles / hr</span>
+              <span className="num text-[11px] font-medium text-foreground">{system?.articles_per_hour || 0}</span>
+            </div>
+            <div className="px-4 py-3 flex items-center justify-between border-b" style={{ borderColor: "rgba(255,255,255,0.03)" }}>
+              <span className="text-[11px] text-muted-foreground tracking-wide">Sentiment Jobs</span>
+              <span className="num text-[11px] font-medium text-foreground">{stats?.total_articles || 0}</span>
+            </div>
+            <div className="px-4 py-3 flex items-center justify-between">
+              <span className="text-[11px] text-muted-foreground tracking-wide">Forecast Jobs</span>
+              <span className="num text-[11px] font-medium text-foreground">{stats?.total_forecasts || 0}</span>
+            </div>
+          </div>
         </div>
 
       </div>

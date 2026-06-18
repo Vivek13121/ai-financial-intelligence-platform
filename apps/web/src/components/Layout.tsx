@@ -15,7 +15,7 @@ export function Layout() {
     <div className="flex h-screen bg-background text-foreground overflow-hidden">
       {/* ── Sidebar ─────────────────────────────────────────────────────── */}
       <aside
-        className="w-[280px] flex flex-col flex-shrink-0 z-10"
+        className="w-[260px] flex flex-col flex-shrink-0 z-10"
         style={{
           backgroundColor: "var(--color-surface)",
           borderRight: "1px solid var(--color-border)",
@@ -23,28 +23,28 @@ export function Layout() {
         }}
       >
         {/* Brand */}
-        <div className="px-7 py-8 flex-shrink-0 flex flex-col gap-2">
-          <div className="flex items-center gap-3">
+        <div className="px-6 py-7 flex-shrink-0 flex flex-col gap-1.5">
+          <div className="flex items-center gap-2.5">
             <span
-              className="block w-1.5 h-5 rounded-[2px] flex-shrink-0"
+              className="block w-1 h-5 rounded-[2px] flex-shrink-0"
               style={{
                 backgroundColor: "var(--color-accent)",
-                boxShadow: "0 0 12px var(--color-accent)"
+                boxShadow: "0 0 10px var(--color-accent)"
               }}
             />
             <span className="text-xl font-bold tracking-tight text-foreground font-display">
               FinIntel AI
             </span>
           </div>
-          <span className="text-[10px] text-muted-foreground uppercase tracking-[0.2em] font-medium pl-4 opacity-80">
+          <span className="text-[9px] text-muted-foreground uppercase tracking-[0.2em] font-medium pl-[14px] opacity-70">
             Institutional Terminal
           </span>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 py-2 overflow-y-auto space-y-1">
-          <div className="px-3 mb-4">
-            <span className="label-section opacity-70">Platform</span>
+        <nav className="flex-1 px-3 overflow-y-auto space-y-0.5">
+          <div className="px-3 mb-3 mt-2">
+            <span className="text-[10px] font-bold tracking-[0.15em] uppercase text-muted-foreground opacity-60">Platform</span>
           </div>
 
           {navItems.map((item) => {
@@ -81,27 +81,21 @@ export function Layout() {
         </nav>
 
         {/* System status footer */}
-        <div className="p-6 mt-auto">
-          <div
-            className="rounded-lg p-4 flex items-center justify-between"
-            style={{
-              backgroundColor: "rgba(0,0,0,0.25)",
-              border: "1px solid rgba(255,255,255,0.04)"
-            }}
-          >
-            <div className="flex flex-col gap-1.5">
-              <span className="label-section">System Status</span>
-              <span className="text-xs font-medium text-foreground tracking-wide opacity-90">
+        <div className="p-4 mt-auto">
+          <div className="rounded-lg p-3 flex items-center justify-between bg-[rgba(255,255,255,0.02)]">
+            <div className="flex flex-col gap-0.5">
+              <span className="text-[9px] font-bold tracking-[0.1em] uppercase text-muted-foreground opacity-70">System Status</span>
+              <span className="text-[11px] font-bold text-foreground">
                 Online & Synced
               </span>
             </div>
-            <span className="relative flex h-2 w-2">
+            <span className="relative flex h-1.5 w-1.5 mr-1">
               <span
                 className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-50"
                 style={{ backgroundColor: "var(--color-positive)" }}
               />
               <span
-                className="relative inline-flex rounded-full h-2 w-2"
+                className="relative inline-flex rounded-full h-1.5 w-1.5"
                 style={{ backgroundColor: "var(--color-positive)" }}
               />
             </span>
