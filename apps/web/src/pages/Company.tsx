@@ -3,8 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { API } from "../lib/api";
 import {
   ArrowLeft, Activity, Newspaper,
-  TrendingUp, TrendingDown, Minus, ExternalLink,
-  BarChart2
+  TrendingUp, TrendingDown, Minus, ExternalLink
 } from "lucide-react";
 import {
   AreaChart, Area, PieChart, Pie, Cell,
@@ -12,6 +11,7 @@ import {
   ResponsiveContainer, LineChart, Line
 } from "recharts";
 import { format, parseISO } from "date-fns";
+import { AISummaryCard } from "../components/AISummaryCard";
 
 export function Company() {
   const { name } = useParams<{ name: string }>();
@@ -186,23 +186,8 @@ export function Company() {
         </div>
       </div>
 
-      {/* ── AI Insight Panel ─────────────────────────────────────────────── */}
-      <div
-        className="card p-6 relative overflow-hidden"
-        style={{ borderLeft: "3px solid var(--color-accent)" }}
-      >
-        <div className="flex gap-4 items-start">
-          <div className="flex-shrink-0">
-            <BarChart2 className="w-5 h-5 mt-0.5" style={{ color: "var(--color-accent)" }} />
-          </div>
-          <div>
-            <h3 className="label-section mb-2">Intelligence Insight</h3>
-            <p className="text-sm text-foreground leading-relaxed opacity-90">
-              {intel.insights}
-            </p>
-          </div>
-        </div>
-      </div>
+      {/* ── AI Summary Card ─────────────────────────────────────────────── */}
+      <AISummaryCard companyName={intel.company_name} />
 
       {/* ── Charts Grid ──────────────────────────────────────────────────── */}
       <div className="grid lg:grid-cols-3 gap-5">

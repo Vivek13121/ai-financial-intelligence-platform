@@ -141,8 +141,31 @@ export const API = {
   getSearchSuggestions: async (query: string): Promise<string[]> => {
     const res = await apiClient.get(`/intelligence/suggestions?q=${encodeURIComponent(query)}`);
     return res.data;
+  },
+
+  getAISummaryStatus: async (companyName: string): Promise<AISummaryStatusResponse> => {
+    const res = await apiClient.get(`/intelligence/${encodeURIComponent(companyName)}/summary/status`);
+    return res.data;
+  },
+
+  getAISummary: async (companyName: string): Promise<AISummaryResponse> => {
+    const res = await apiClient.get(`/intelligence/${encodeURIComponent(companyName)}/summary`);
+    return res.data;
   }
 };
+
+export interface AISummaryStatusResponse {
+  is_cached: boolean;
+  generated_at: string | null;
+}
+
+export interface AISummaryResponse {
+  executive_summary: string;
+  risks: string[];
+  opportunities: string[];
+  forecast_outlook: string;
+  generated_at: string;
+}
 
 export interface ForecastDataPoint {
   date: string;
