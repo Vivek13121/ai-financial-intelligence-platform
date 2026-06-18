@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { API } from "../lib/api";
-import { Search as SearchIcon, Building2, TrendingUp, Cpu, Car } from "lucide-react";
+import { Search as SearchIcon, Building2, Cpu, Car } from "lucide-react";
 
 export function Search() {
   const [query, setQuery] = useState("");
@@ -33,89 +33,126 @@ export function Search() {
   };
 
   const trendingSearches = [
-    { name: "Nvidia", icon: Cpu, trend: "+12%" },
-    { name: "Tesla", icon: Car, trend: "-4%" },
-    { name: "Apple", icon: Building2, trend: "+2%" },
-    { name: "Microsoft", icon: Building2, trend: "+8%" }
+    { ticker: "NVDA", name: "Nvidia",    icon: Cpu,       trend: "+12%" },
+    { ticker: "TSLA", name: "Tesla",     icon: Car,       trend: "-4%"  },
+    { ticker: "AAPL", name: "Apple",     icon: Building2, trend: "+2%"  },
+    { ticker: "MSFT", name: "Microsoft", icon: Building2, trend: "+8%"  },
   ];
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 max-w-4xl mx-auto pt-10">
-      <div className="text-center space-y-4">
-        <div className="w-16 h-16 bg-primary/20 rounded-2xl flex items-center justify-center mx-auto mb-6 ring-1 ring-primary/30">
-          <SearchIcon className="w-8 h-8 text-primary" />
+    <div className="animate-in fade-in duration-300 max-w-2xl mx-auto pt-12">
+
+      {/* Header */}
+      <div className="mb-10">
+        <div
+          className="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-6"
+          style={{ backgroundColor: "rgba(91,141,239,0.10)", border: "1px solid rgba(91,141,239,0.20)" }}
+        >
+          <SearchIcon className="w-5 h-5" style={{ color: "var(--color-accent)" }} />
         </div>
-        <h2 className="text-4xl font-bold tracking-tight">Company Intelligence Engine</h2>
-        <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-          Enter a company name to instantly generate a comprehensive AI-driven intelligence dashboard, sentiment forecast, and news analysis.
+        <h2 className="text-2xl font-bold tracking-tight text-foreground font-display mb-2">
+          Company Intelligence Search
+        </h2>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          Search by company name, ticker symbol, or alias. Resolves to a canonical entity and returns full intelligence coverage.
         </p>
       </div>
 
-      <form onSubmit={handleSearch} className="relative group mt-8 z-50">
-        <div className="absolute -inset-1 bg-gradient-to-r from-primary/50 to-blue-500/50 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
-        <div className="relative flex items-center">
-          <SearchIcon className="absolute left-6 w-6 h-6 text-muted-foreground" />
-          <input 
-            type="text" 
-            placeholder="Search for a company (e.g. Nvidia, Tesla, OpenAI)..."
-            className="w-full bg-background border-2 border-white/10 rounded-2xl py-6 pl-16 pr-36 outline-none focus:border-primary/50 transition-colors text-xl shadow-2xl relative z-10"
+      {/* Search Form */}
+      <form onSubmit={handleSearch} className="relative mb-10">
+        <div
+          className="flex items-center rounded-lg overflow-visible"
+          style={{
+            backgroundColor: "var(--color-surface)",
+            border: `1px solid ${isFocused ? "rgba(91,141,239,0.4)" : "var(--color-border)"}`,
+            transition: "border-color 0.2s",
+          }}
+        >
+          <SearchIcon className="w-4 h-4 ml-4 flex-shrink-0" style={{ color: "var(--color-neutral)" }} />
+          <input
+            type="text"
+            placeholder="Search for a company, ticker, or alias…"
+            className="flex-1 bg-transparent px-3 py-3.5 text-sm outline-none text-foreground placeholder:text-muted-foreground"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setTimeout(() => setIsFocused(false), 200)}
           />
-          <button 
+          <button
             type="submit"
             disabled={!query.trim()}
-            className="absolute right-3 bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg z-20"
+            className="btn-primary mr-2 my-2 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Analyze
           </button>
         </div>
-        
-        {/* Autocomplete Dropdown */}
+
+        {/* Autocomplete */}
         {isFocused && suggestions && suggestions.length > 0 && (
-          <div className="absolute top-full left-0 right-0 mt-2 bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50">
+          <div
+            className="absolute top-full left-0 right-0 mt-1 rounded-lg overflow-hidden shadow-2xl z-50"
+            style={{
+              backgroundColor: "var(--color-elevated)",
+              border: "1px solid var(--color-border)",
+            }}
+          >
             {suggestions.map((suggestion, idx) => (
               <button
                 key={idx}
                 type="button"
                 onClick={() => handleSuggestionClick(suggestion)}
-                className="w-full text-left px-6 py-4 hover:bg-white/10 transition-colors flex items-center gap-3 border-b border-white/5 last:border-0"
+                className="w-full text-left px-4 py-3 flex items-center gap-3 transition-colors text-sm"
+                style={{ borderBottom: idx < suggestions.length - 1 ? `1px solid var(--color-border)` : "none" }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.03)")}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "")}
               >
-                <SearchIcon className="w-4 h-4 text-muted-foreground" />
-                <span className="font-medium text-lg">{suggestion}</span>
+                <SearchIcon className="w-3.5 h-3.5 flex-shrink-0 text-muted-foreground" />
+                <span className="font-medium text-foreground">{suggestion}</span>
               </button>
             ))}
           </div>
         )}
       </form>
 
-      <div className="mt-16">
-        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-6 text-center">Trending Companies</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {/* Trending Companies */}
+      <div>
+        <p className="label-section mb-4">Trending Companies</p>
+        <div className="flex flex-col divide-y" style={{ borderColor: "var(--color-border)" }}>
           {trendingSearches.map((company) => {
-            const Icon = company.icon;
             const isPositive = company.trend.startsWith("+");
             return (
-              <button 
-                key={company.name}
+              <button
+                key={company.ticker}
                 onClick={() => navigate(`/company/${company.name}`)}
-                className="glass-card p-4 rounded-xl flex flex-col items-center gap-3 hover:bg-white/10 transition-colors group cursor-pointer"
+                className="flex items-center justify-between py-3 text-left transition-colors group"
+                onMouseEnter={(e) => (e.currentTarget.style.color = "var(--color-accent)")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "")}
               >
-                <div className="p-3 bg-white/5 rounded-lg group-hover:bg-primary/20 transition-colors">
-                  <Icon className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
+                <div className="flex items-center gap-3">
+                  <span
+                    className="num text-[10px] font-bold px-1.5 py-0.5 rounded"
+                    style={{
+                      backgroundColor: "rgba(91,141,239,0.08)",
+                      color: "var(--color-accent)",
+                      border: "1px solid rgba(91,141,239,0.16)"
+                    }}
+                  >
+                    {company.ticker}
+                  </span>
+                  <span className="text-sm font-medium text-foreground">{company.name}</span>
                 </div>
-                <span className="font-semibold text-lg">{company.name}</span>
-                <span className={`text-sm font-medium ${isPositive ? 'text-emerald-400' : 'text-red-400'}`}>
-                  {isPositive ? <TrendingUp className="w-3 h-3 inline mr-1" /> : null}
-                  {company.trend} sentiment
+                <span
+                  className="num text-xs font-semibold"
+                  style={{ color: isPositive ? "var(--color-positive)" : "var(--color-negative)" }}
+                >
+                  {company.trend}
                 </span>
               </button>
             );
           })}
         </div>
       </div>
+
     </div>
   );
 }

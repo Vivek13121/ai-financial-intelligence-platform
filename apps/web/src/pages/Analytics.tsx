@@ -282,5 +282,3 @@ function CustomTooltip({ active, payload, label, formatScore }: any) {
   }
   return null;
 }
-
-

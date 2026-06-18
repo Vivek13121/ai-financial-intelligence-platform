@@ -60,7 +60,6 @@ export interface TrendingCompany {
 }
 
 export interface AnalyticsStats {
-  window_used: string;
   total_articles: number;
   total_forecasts: number;
   market_sentiment_score: number;
@@ -70,6 +69,7 @@ export interface AnalyticsStats {
   articles_today: number;
   sentiment_change: number;
   trending_companies: TrendingCompany[];
+  window_used?: string;
 }
 
 export interface ActivityEvent {
@@ -79,7 +79,14 @@ export interface ActivityEvent {
   message: string;
 }
 
-
+export interface ForecastResult {
+  id: string;
+  forecast_date: string;
+  predicted_sentiment: number;
+  confidence_lower: number;
+  confidence_upper: number;
+  generated_at: string;
+}
 
 export const API = {
   getArticles: async (skip = 0, limit = 10, search = ""): Promise<Article[]> => {
@@ -92,7 +99,10 @@ export const API = {
     return res.data;
   },
 
-
+  getLatestForecasts: async (limit = 14): Promise<ForecastResult[]> => {
+    const res = await apiClient.get(`/forecast/latest?limit=${limit}`);
+    return res.data;
+  },
 
   getAnalyticsStats: async (): Promise<AnalyticsStats> => {
     const res = await apiClient.get("/analytics/stats");
@@ -131,14 +141,6 @@ export const API = {
   getSearchSuggestions: async (query: string): Promise<string[]> => {
     const res = await apiClient.get(`/intelligence/suggestions?q=${encodeURIComponent(query)}`);
     return res.data;
-  },
-  getCompanySummary: async (companyName: string): Promise<AISummaryResponse> => {
-    const res = await apiClient.get(`/intelligence/${encodeURIComponent(companyName)}/summary`);
-    return res.data;
-  },
-  checkCompanySummaryStatus: async (companyName: string): Promise<{ is_cached: boolean; generated_at?: string }> => {
-    const res = await apiClient.get(`/intelligence/${encodeURIComponent(companyName)}/summary/status`);
-    return res.data;
   }
 };
 
@@ -162,13 +164,6 @@ export interface CompanyIntelligence {
   insights: string;
   sentiment_distribution: SentimentDistribution;
   related_topics: string[];
-}
-
-export interface AISummaryResponse {
-  executive_summary: string;
-  risks: string[];
-  opportunities: string[];
-  forecast_outlook: string;
 }
 
 export interface TimeSeriesDataPoint {

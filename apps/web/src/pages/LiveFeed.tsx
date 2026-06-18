@@ -57,6 +57,7 @@ function ArticleCard({ article }: { article: Article }) {
                 {article.company}
               </span>
             )}
+            <SentimentBadge articleId={article.id} />
           </div>
           
           <h3 className="text-xl font-semibold mb-2 group-hover:text-primary transition-colors">
@@ -86,5 +87,33 @@ function ArticleCard({ article }: { article: Article }) {
         </div>
       </div>
     </div>
+  );
+}
+
+function SentimentBadge({ articleId }: { articleId: string }) {
+  const { data, isLoading } = useQuery({
+    queryKey: ["sentiment", articleId],
+    queryFn: () => API.getArticleSentiment(articleId),
+  });
+
+  if (isLoading) {
+    return <span className="h-5 w-16 bg-white/10 rounded animate-pulse" />;
+  }
+
+  const latest = data?.[0];
+  if (!latest) return null;
+
+  const getColors = (label: string) => {
+    switch(label.toLowerCase()) {
+      case 'positive': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+      case 'negative': return 'bg-red-500/10 text-red-400 border-red-500/20';
+      default: return 'bg-gray-500/10 text-gray-400 border-gray-500/20';
+    }
+  };
+
+  return (
+    <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full border uppercase tracking-wider ${getColors(latest.sentiment_label)}`}>
+      {latest.sentiment_label}
+    </span>
   );
 }

@@ -4,6 +4,8 @@ from sqlalchemy import func, cast, Date, desc, or_, String
 
 from app.models.article import Article
 from app.models.sentiment_result import SentimentResult
+from app.models.entity import Entity
+from app.models.article_entity import ArticleEntity
 from app.crud.analytics import get_sentiment_score
 from app.schemas.intelligence import (
     CompanyIntelligence, 
@@ -12,28 +14,53 @@ from app.schemas.intelligence import (
 )
 from app.schemas.article import ArticleResponse
 
+def resolve_entity(db: Session, search_term: str):
+    """Resolve a search term to a canonical Entity using priority-ranked matching."""
+    if not search_term:
+        return None
+    term = search_term.strip()
+    term_lower = term.lower()
+
+    # 1. Exact ticker match
+    entity = db.query(Entity).filter(func.lower(Entity.symbol) == term_lower).first()
+    if entity:
+        return entity
+
+    # 2. Exact alias match (JSON array containment)
+    entities = db.query(Entity).filter(cast(Entity.aliases, String).ilike(f'%"{term}"%')).all()
+    for ent in entities:
+        if any(a.lower() == term_lower for a in ent.aliases):
+            return ent
+
+    # 3. Exact canonical name match
+    entity = db.query(Entity).filter(func.lower(Entity.name) == term_lower).first()
+    if entity:
+        return entity
+
+    # 4. Prefix match on name
+    entity = db.query(Entity).filter(Entity.name.ilike(f"{term}%")).first()
+    if entity:
+        return entity
+
+    # 5. Contains match on name
+    entity = db.query(Entity).filter(Entity.name.ilike(f"%{term}%")).first()
+    return entity
+
 def get_company_intelligence(db: Session, company_name: str) -> CompanyIntelligence:
-    COMPANY_ALIASES = {
-        "google": ["google", "alphabet", "goog", "googl"],
-        "apple": ["apple", "aapl"],
-        "tesla": ["tesla", "tsla"],
-        "microsoft": ["microsoft", "msft"],
-        "amazon": ["amazon", "amzn"],
-        "nvidia": ["nvidia", "nvda"],
-        "meta": ["meta", "facebook", "fb"]
-    }
-    
-    c_lower = company_name.lower()
-    aliases = COMPANY_ALIASES.get(c_lower, [company_name])
-    
-    conditions = []
-    for alias in aliases:
-        term = f"%{alias}%"
-        conditions.append(Article.company.ilike(term))
-        conditions.append(Article.title.ilike(term))
-        conditions.append(Article.content.ilike(term))
-        
-    filter_cond = or_(*conditions)
+    canonical_entity = resolve_entity(db, company_name)
+    resolved_name = canonical_entity.name if canonical_entity else company_name
+
+    if canonical_entity:
+        filter_cond = Article.id.in_(
+            db.query(ArticleEntity.article_id).filter(ArticleEntity.entity_id == canonical_entity.id)
+        )
+    else:
+        term = f"%{company_name}%"
+        filter_cond = or_(
+            Article.company.ilike(term),
+            Article.title.ilike(term),
+            Article.content.ilike(term)
+        )
 
     # Deduplicate articles by URL (or ID if no URL) using a window function
     subq = (
@@ -231,7 +258,7 @@ def get_company_intelligence(db: Session, company_name: str) -> CompanyIntellige
         related_topics = [company_name, "Market Performance", "Earnings"]
     
     return CompanyIntelligence(
-        company_name=company_name,
+        company_name=resolved_name,
         overview=IntelligenceOverview(
             total_articles=total_articles,
             current_sentiment=current_sentiment,
@@ -247,39 +274,20 @@ def get_company_intelligence(db: Session, company_name: str) -> CompanyIntellige
 
 def get_search_suggestions(db: Session, query: str) -> list[str]:
     search_term = f"{query}%"
-    
-    # Try to find matching companies
-    companies = (
-        db.query(Article.company, func.count(Article.id).label("mentions"))
-        .filter(Article.company.ilike(search_term))
-        .filter(Article.company != None)
-        .filter(Article.company != "")
-        .group_by(Article.company)
+
+    # Query entities table — resolves by name, symbol, or aliases
+    entities = (
+        db.query(Entity.name, func.count(ArticleEntity.id).label("mentions"))
+        .outerjoin(ArticleEntity, Entity.id == ArticleEntity.entity_id)
+        .filter(or_(
+            Entity.name.ilike(search_term),
+            Entity.symbol.ilike(search_term),
+            cast(Entity.aliases, String).ilike(f'%"{query}%')
+        ))
+        .group_by(Entity.name)
         .order_by(desc("mentions"))
         .limit(5)
         .all()
     )
-    
-    suggestions = [c[0] for c in companies if c[0]]
-    
-    # If not enough companies, fallback to title matching for partial entities
-    if len(suggestions) < 5:
-        titles = (
-            db.query(Article.title)
-            .filter(Article.title.ilike(f"%{query}%"))
-            .limit(20)
-            .all()
-        )
-        import re
-        for (title,) in titles:
-            if title:
-                words = re.findall(r'\b[A-Z][a-z]+\b', title)
-                for w in words:
-                    if w.lower().startswith(query.lower()) and w not in suggestions and len(w) > 2:
-                        suggestions.append(w)
-                    if len(suggestions) >= 5:
-                        break
-            if len(suggestions) >= 5:
-                break
-                
-    return suggestions
+
+    return [e[0] for e in entities if e[0]]
