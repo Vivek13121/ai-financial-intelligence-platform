@@ -293,10 +293,10 @@ export function Dashboard() {
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 flex-1">
-              <div className="card-elevated p-4 rounded-xl flex flex-col justify-between h-full">
+              <div className="card-elevated p-4 rounded-xl flex flex-col h-full">
                 <span className="text-[10px] font-bold tracking-wider uppercase text-muted-foreground mb-3">Direction</span>
                 <span
-                  className="text-2xl font-bold tracking-tight"
+                  className="text-2xl font-bold tracking-tight mt-auto leading-none"
                   style={{
                     color: latestRun.trend === "Improving"
                       ? "var(--color-positive)"
@@ -308,23 +308,23 @@ export function Dashboard() {
                   {latestRun.trend === "Improving" ? "Bullish" : latestRun.trend === "Declining" ? "Bearish" : "Neutral"}
                 </span>
               </div>
-              <div className="card-elevated p-4 rounded-xl flex flex-col justify-between h-full">
+              <div className="card-elevated p-4 rounded-xl flex flex-col h-full">
                 <span className="text-[10px] font-bold tracking-wider uppercase text-muted-foreground mb-3">Expected Δ</span>
-                <span className="text-2xl font-bold tracking-tight text-foreground">
+                <span className="text-2xl font-bold tracking-tight text-foreground mt-auto leading-none">
                   53.8%
                 </span>
               </div>
-              <div className="card-elevated p-4 rounded-xl flex flex-col justify-between h-full">
+              <div className="card-elevated p-4 rounded-xl flex flex-col h-full">
                 <span className="text-[10px] font-bold tracking-wider uppercase text-muted-foreground mb-3">Confidence</span>
-                <span className="text-xl font-bold tracking-tight text-foreground mt-auto">
+                <span className="text-2xl font-bold tracking-tight text-foreground mt-auto leading-none">
                   Medium
                 </span>
               </div>
-              <div className="card-elevated p-4 rounded-xl flex flex-col justify-between h-full">
+              <div className="card-elevated p-4 rounded-xl flex flex-col h-full">
                 <span className="text-[10px] font-bold tracking-wider uppercase text-muted-foreground mb-3">Model Age</span>
-                <div className="flex items-center gap-1.5 text-muted-foreground mt-auto">
-                  <RefreshCw className="w-3.5 h-3.5" />
-                  <span className="text-xs font-medium">{getForecastFreshness()}</span>
+                <div className="flex items-center gap-1.5 text-muted-foreground mt-auto leading-none">
+                  <RefreshCw className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span className="text-[11px] sm:text-xs font-medium leading-tight">{getForecastFreshness()}</span>
                 </div>
               </div>
             </div>
