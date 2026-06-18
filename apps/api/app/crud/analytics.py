@@ -268,7 +268,7 @@ def get_stats(db: Session):
     }
 
     sentiment_change = 0.0
-    if sum(previous_dist.values()) > 0 and sum(recent_dist.values()) > 0:
+    if sum(recent_dist.values()) > 0:
         sentiment_change = recent_score - previous_score
         
     market_mood = "Neutral"
