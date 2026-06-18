@@ -145,15 +145,15 @@ export function Analytics() {
         </div>
 
         {/* Top Topics Panel */}
-        <div className="glass-card p-6 rounded-xl col-span-full md:col-span-2 lg:col-span-2 flex flex-col border-white/5">
-          <h3 className="text-lg font-semibold mb-6 flex items-center gap-2"><TargetIcon className="w-5 h-5 text-primary"/> Thematic Extraction (7 Days)</h3>
+        <div className="glass-card p-6 rounded-xl col-span-full md:col-span-2 lg:col-span-2 flex flex-col border-white/5 h-[350px]">
+          <h3 className="text-lg font-semibold mb-6 flex items-center gap-2 shrink-0"><TargetIcon className="w-5 h-5 text-primary"/> Thematic Extraction (7 Days)</h3>
           {topicsLoading ? <ChartSkeleton /> : !topics || (topics.positive.length === 0 && topics.negative.length === 0) ? <EmptyState message="Not enough entities extracted yet" /> : (
-            <div className="grid sm:grid-cols-2 gap-8 flex-1">
-              <div>
-                <h4 className="text-emerald-400 font-medium mb-4 flex items-center gap-2">
+            <div className="grid sm:grid-cols-2 gap-8 flex-1 min-h-0">
+              <div className="flex flex-col min-h-0">
+                <h4 className="text-emerald-400 font-medium mb-4 flex items-center gap-2 shrink-0">
                   <span className="w-2 h-2 rounded-full bg-emerald-400" /> Bullish Topics
                 </h4>
-                <div className="space-y-3">
+                <div className="space-y-3 overflow-y-auto pr-2 flex-1 min-h-0">
                   {topics.positive.length === 0 ? <EmptyState message="No positive topics" /> : topics.positive.map((t, i) => (
                     <div key={i} className="flex justify-between items-center bg-emerald-500/5 hover:bg-emerald-500/10 transition-colors border border-emerald-500/10 p-3 rounded-lg">
                       <div>
@@ -165,11 +165,11 @@ export function Analytics() {
                   ))}
                 </div>
               </div>
-              <div>
-                <h4 className="text-red-400 font-medium mb-4 flex items-center gap-2">
+              <div className="flex flex-col min-h-0">
+                <h4 className="text-red-400 font-medium mb-4 flex items-center gap-2 shrink-0">
                   <span className="w-2 h-2 rounded-full bg-red-400" /> Bearish Topics
                 </h4>
-                <div className="space-y-3">
+                <div className="space-y-3 overflow-y-auto pr-2 flex-1 min-h-0">
                   {topics.negative.length === 0 ? <EmptyState message="No negative topics" /> : topics.negative.map((t, i) => (
                     <div key={i} className="flex justify-between items-center bg-red-500/5 hover:bg-red-500/10 transition-colors border border-red-500/10 p-3 rounded-lg">
                       <div>

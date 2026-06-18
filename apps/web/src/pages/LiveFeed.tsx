@@ -47,7 +47,7 @@ export function LiveFeed() {
             </div>
           ))
         ) : (
-          articles?.map((article, idx) => <ArticleRow key={article.id} article={article} index={idx} />)
+          articles?.map((article) => <ArticleRow key={article.id} article={article} />)
         )}
         
         {articles?.length === 0 && !isLoading && (
@@ -60,7 +60,7 @@ export function LiveFeed() {
   );
 }
 
-function ArticleRow({ article, index }: { article: Article, index: number }) {
+function ArticleRow({ article }: { article: Article }) {
   return (
     <div 
       className="group flex items-start gap-4 p-4 border-b last:border-b-0 transition-colors relative hover:bg-[rgba(255,255,255,0.02)]"
