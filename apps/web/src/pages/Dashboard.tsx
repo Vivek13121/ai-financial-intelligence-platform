@@ -293,10 +293,10 @@ export function Dashboard() {
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 flex-1">
-              <div className="card-elevated p-4 rounded-xl flex flex-col h-full">
-                <span className="text-[10px] font-bold tracking-wider uppercase text-muted-foreground mb-3">Direction</span>
+              <div className="card-elevated p-5 rounded-xl flex flex-col justify-start h-full">
+                <span className="text-[10px] font-bold tracking-wider uppercase text-muted-foreground mb-2">Direction</span>
                 <span
-                  className="text-2xl font-bold tracking-tight mt-auto leading-none"
+                  className="text-2xl font-bold tracking-tight"
                   style={{
                     color: latestRun.trend === "Improving"
                       ? "var(--color-positive)"
@@ -308,23 +308,23 @@ export function Dashboard() {
                   {latestRun.trend === "Improving" ? "Bullish" : latestRun.trend === "Declining" ? "Bearish" : "Neutral"}
                 </span>
               </div>
-              <div className="card-elevated p-4 rounded-xl flex flex-col h-full">
-                <span className="text-[10px] font-bold tracking-wider uppercase text-muted-foreground mb-3">Expected Δ</span>
-                <span className="text-2xl font-bold tracking-tight text-foreground mt-auto leading-none">
+              <div className="card-elevated p-5 rounded-xl flex flex-col justify-start h-full">
+                <span className="text-[10px] font-bold tracking-wider uppercase text-muted-foreground mb-2">Expected Δ</span>
+                <span className="text-2xl font-bold tracking-tight text-foreground">
                   53.8%
                 </span>
               </div>
-              <div className="card-elevated p-4 rounded-xl flex flex-col h-full">
-                <span className="text-[10px] font-bold tracking-wider uppercase text-muted-foreground mb-3">Confidence</span>
-                <span className="text-2xl font-bold tracking-tight text-foreground mt-auto leading-none">
+              <div className="card-elevated p-5 rounded-xl flex flex-col justify-start h-full">
+                <span className="text-[10px] font-bold tracking-wider uppercase text-muted-foreground mb-2">Confidence</span>
+                <span className="text-2xl font-bold tracking-tight text-foreground">
                   Medium
                 </span>
               </div>
-              <div className="card-elevated p-4 rounded-xl flex flex-col h-full">
-                <span className="text-[10px] font-bold tracking-wider uppercase text-muted-foreground mb-3">Model Age</span>
-                <div className="flex items-center gap-1.5 text-muted-foreground mt-auto leading-none">
-                  <RefreshCw className="w-3.5 h-3.5 flex-shrink-0" />
-                  <span className="text-[11px] sm:text-xs font-medium leading-tight">{getForecastFreshness()}</span>
+              <div className="card-elevated p-5 rounded-xl flex flex-col justify-start h-full">
+                <span className="text-[10px] font-bold tracking-wider uppercase text-muted-foreground mb-2">Model Age</span>
+                <div className="flex items-center gap-1.5 text-foreground">
+                  <RefreshCw className="w-4 h-4 flex-shrink-0 text-muted-foreground" />
+                  <span className="text-lg sm:text-xl font-bold tracking-tight">{getForecastFreshness().replace('about ', '')}</span>
                 </div>
               </div>
             </div>
