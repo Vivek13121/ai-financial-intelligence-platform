@@ -58,11 +58,23 @@ export function Dashboard() {
 
   const getMovementSubtext = () => {
     if (!stats) return "";
-    if (stats.sentiment_change > 0)
-      return `Market optimism increasing (+${stats.sentiment_change.toFixed(1)} pts)`;
-    if (stats.sentiment_change < 0)
-      return `Negative sentiment accelerating (${stats.sentiment_change.toFixed(1)} pts)`;
+    if (stats.sentiment_change > 0) return "Market optimism increasing";
+    if (stats.sentiment_change < 0) return "Negative sentiment accelerating";
     return "Minor movement detected";
+  };
+
+  const getMovementPointsText = () => {
+    if (!stats) return "";
+    if (stats.sentiment_change > 0) return `(+${stats.sentiment_change.toFixed(1)} pts)`;
+    if (stats.sentiment_change < 0) return `(${stats.sentiment_change.toFixed(1)} pts)`;
+    return "(0.0 pts)";
+  };
+
+  const getMovementPointsValue = () => {
+    if (!stats) return "0.0 pts";
+    if (stats.sentiment_change > 0) return `+${stats.sentiment_change.toFixed(1)} pts`;
+    if (stats.sentiment_change < 0) return `${stats.sentiment_change.toFixed(1)} pts`;
+    return "0.0 pts";
   };
 
   const getForecastFreshness = () => {
@@ -247,9 +259,19 @@ export function Dashboard() {
               </div>
             )}
             <div>
-              <p className="text-base font-bold text-foreground">{getMovementText()}</p>
-              <p className="text-xs text-muted-foreground mt-1">{getMovementSubtext()}</p>
+              <p className="text-lg font-bold" style={{ color: movementColor }}>{getMovementText()}</p>
+              <div className="text-xs text-muted-foreground mt-1.5 space-y-1">
+                <p>{getMovementSubtext()}</p>
+                <p>{getMovementPointsText()}</p>
+              </div>
             </div>
+            {!statsLoading && stats && (
+              <div className="mt-2">
+                <span className="badge" style={{ color: movementColor, backgroundColor: movementBg }}>
+                  {getMovementPointsValue()}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
