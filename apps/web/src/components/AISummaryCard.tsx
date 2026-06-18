@@ -59,7 +59,7 @@ export function AISummaryCard({ companyName }: AISummaryCardProps) {
           </div>
           <div>
             <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
-              Gemini Flash Intelligence
+              Executive Summary
               {summary && (
                 <span className="badge badge-positive flex items-center gap-1.5 ml-2">
                   <CheckCircle2 className="w-3 h-3" /> Ready
@@ -122,7 +122,7 @@ export function AISummaryCard({ companyName }: AISummaryCardProps) {
               <BrainCircuit className="w-8 h-8 text-muted-foreground" />
             </div>
             <div>
-              <p className="text-foreground font-medium text-lg">Report Not Generated</p>
+              <p className="text-foreground font-medium text-lg"></p>
               <p className="text-sm text-muted-foreground max-w-md mx-auto mt-2 leading-relaxed">
                 Generate a comprehensive AI report for {companyName} to unlock executive summaries, risk analysis, and forecasting insights.
               </p>
