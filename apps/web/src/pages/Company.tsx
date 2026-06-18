@@ -17,10 +17,11 @@ export function Company() {
   const { name } = useParams<{ name: string }>();
   const navigate = useNavigate();
 
-  const { data: intel, isLoading, isError } = useQuery({
+  const { data: intel, isLoading, isError, error } = useQuery({
     queryKey: ["company-intel", name],
     queryFn: () => API.getCompanyIntelligence(name!),
     enabled: !!name,
+    retry: false,
   });
 
   if (isLoading) {
@@ -48,12 +49,44 @@ export function Company() {
   }
 
   if (isError || !intel) {
+    const isBadRequest = (error as any)?.response?.status === 400;
+    
     return (
-      <div className="h-full flex flex-col items-center justify-center gap-4">
-        <p className="text-sm" style={{ color: "var(--color-negative)" }}>Failed to load intelligence data.</p>
+      <div className="h-[70vh] flex flex-col items-center justify-center gap-4">
+        <div className="p-4 rounded-full bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.05)] mb-2">
+          <Newspaper className="w-8 h-8 text-muted-foreground" />
+        </div>
+        <p className="text-lg font-medium text-foreground">
+          {isBadRequest ? "Invalid search query" : "No intelligence data found"}
+        </p>
+        <p className="text-sm text-muted-foreground max-w-md text-center">
+          {isBadRequest 
+            ? "Please enter a longer company name or ticker symbol to search." 
+            : `We couldn't find any recent intelligence coverage for "${name}".`}
+        </p>
         <button
           onClick={() => navigate("/search")}
-          className="btn-ghost flex items-center gap-2"
+          className="btn-primary mt-4 flex items-center gap-2"
+        >
+          <ArrowLeft className="w-4 h-4" /> Back to Search
+        </button>
+      </div>
+    );
+  }
+
+  if (intel.overview.total_articles === 0) {
+    return (
+      <div className="h-[70vh] flex flex-col items-center justify-center gap-4">
+        <div className="p-4 rounded-full bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.05)] mb-2">
+          <Newspaper className="w-8 h-8 text-muted-foreground" />
+        </div>
+        <p className="text-lg font-medium text-foreground">No recent coverage found</p>
+        <p className="text-sm text-muted-foreground max-w-md text-center">
+          We currently have no ingested articles or sentiment data matching "{intel.company_name}" in the database.
+        </p>
+        <button
+          onClick={() => navigate("/search")}
+          className="btn-primary mt-4 flex items-center gap-2"
         >
           <ArrowLeft className="w-4 h-4" /> Back to Search
         </button>
