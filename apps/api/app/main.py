@@ -20,6 +20,19 @@ Import side-effect — `app.models` must be imported BEFORE create_all():
   ensuring they are all registered before we call create_all().
 """
 
+import sys
+import os
+
+# --- ADDED: Monorepo Root Injection ---
+# Ensures 'import packages.*' works when uvicorn is run from the apps/api subdirectory
+_here = os.path.dirname(os.path.abspath(__file__))              # apps/api/app/
+_api_root = os.path.abspath(os.path.join(_here, ".."))          # apps/api/
+_repo_root = os.path.abspath(os.path.join(_api_root, "..", "..")) # monorepo root
+
+if _repo_root not in sys.path:
+    sys.path.insert(0, _repo_root)
+# ---------------------------------------
+
 from fastapi import FastAPI
 
 from app.config import settings
