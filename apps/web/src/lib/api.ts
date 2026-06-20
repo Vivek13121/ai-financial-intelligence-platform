@@ -1,8 +1,12 @@
 import axios from "axios";
 
-// Vite proxy redirects /api to the backend
+// Use environment variable for API URL (bypassing Vite proxy)
+const baseURL = import.meta.env.VITE_API_URL 
+  ? `${import.meta.env.VITE_API_URL}/api/v1` 
+  : "/api/v1";
+
 const apiClient = axios.create({
-  baseURL: "/api/v1",
+  baseURL,
   headers: {
     "Content-type": "application/json",
   },

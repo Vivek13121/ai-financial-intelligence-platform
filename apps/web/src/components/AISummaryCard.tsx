@@ -46,7 +46,7 @@ export function AISummaryCard({ companyName }: AISummaryCardProps) {
     generateMutation.mutate();
   };
 
-  const isLoading = statusLoading || summaryLoading || generateMutation.isPending;
+  const isGenerating = generateMutation.isPending;
 
   return (
     <div className="card p-6 relative overflow-hidden" style={{ borderTop: "3px solid var(--color-accent)" }}>
@@ -106,7 +106,7 @@ export function AISummaryCard({ companyName }: AISummaryCardProps) {
               Retry Generation
             </button>
           </div>
-        ) : isLoading ? (
+        ) : isGenerating ? (
           <div className="card-elevated p-8 flex flex-col items-center justify-center gap-4">
             <div className="relative w-12 h-12 flex items-center justify-center">
               <div className="absolute inset-0 border-2 border-[var(--color-border)] rounded-full" />
@@ -118,7 +118,7 @@ export function AISummaryCard({ companyName }: AISummaryCardProps) {
               <p className="text-xs text-muted-foreground mt-1 font-mono">Running Gemini 3.5 Flash pipeline</p>
             </div>
           </div>
-        ) : !summary && !statusData?.is_cached ? (
+        ) : !summary ? (
           <div className="card-elevated p-8 flex flex-col items-center justify-center gap-5 text-center">
             <div className="p-4 rounded-full bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.05)]">
               <FileSearch className="w-8 h-8 text-muted-foreground" />
