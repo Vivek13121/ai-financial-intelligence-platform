@@ -23,11 +23,18 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 
 from app.config import settings
 
+# Replace postgres:// or postgresql:// with postgresql+psycopg:// for psycopg3
+db_url = settings.database_url
+if db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql+psycopg://", 1)
+elif db_url.startswith("postgresql://"):
+    db_url = db_url.replace("postgresql://", "postgresql+psycopg://", 1)
+
 # create_engine sets up a connection pool (default: 5 connections).
 # pool_pre_ping=True checks each connection is alive before using it —
 # protects against stale connections after a Postgres restart.
 engine = create_engine(
-    settings.database_url,
+    db_url,
     pool_pre_ping=True,
 )
 
