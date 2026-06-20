@@ -4,7 +4,7 @@ uvicorn[standard]==0.30.1
 
 # Database
 sqlalchemy==2.0.43
-psycopg[binary]==3.2.9
+psycopg[binary]==3.2.13
 
 # Config & Env
 pydantic-settings==2.2.1
