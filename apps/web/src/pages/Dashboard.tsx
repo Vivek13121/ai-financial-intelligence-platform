@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { API } from "../lib/api";
 import {
@@ -8,7 +7,6 @@ import {
 import { formatDistanceToNow } from "date-fns";
 
 export function Dashboard() {
-  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
   const {
     data: stats,
@@ -36,9 +34,8 @@ export function Dashboard() {
     refetchInterval: 10000,
   });
 
-  useEffect(() => {
-    setLastUpdated(new Date());
-  }, [statsUpdatedAt, systemUpdatedAt]);
+  // eslint-disable-next-line react-hooks/purity
+  const lastUpdated = new Date(Math.max(statsUpdatedAt || 0, systemUpdatedAt || 0) || Date.now());
 
   const latestRun = runs?.[0];
 

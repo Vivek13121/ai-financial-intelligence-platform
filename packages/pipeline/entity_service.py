@@ -200,7 +200,7 @@ SPACY_LABEL_MAP = {
 
 # Words to skip even if spaCy identifies them as entities
 ENTITY_STOP_WORDS = {
-    "reuters", "bloomberg", "cnbc", "yahoo", "associated press", "ap",
+    "thestreet", "bloomberg", "cnbc", "yahoo", "associated press", "ap",
     "wall street", "nasdaq", "s&p", "dow jones", "nyse",
     "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday",
     "january", "february", "march", "april", "may", "june",

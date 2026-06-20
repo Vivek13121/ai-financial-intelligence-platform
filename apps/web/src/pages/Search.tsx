@@ -100,7 +100,12 @@ export function Search() {
               <button
                 key={idx}
                 type="button"
-                onClick={() => handleSuggestionClick(suggestion)}
+                onMouseDown={(e) => {
+                  e.preventDefault(); // Prevents input onBlur from firing before this handles
+                  setQuery(suggestion);
+                  setIsFocused(false);
+                  handleSuggestionClick(suggestion);
+                }}
                 className="w-full text-left px-4 py-3 flex items-center gap-3 transition-colors text-sm"
                 style={{ borderBottom: idx < suggestions.length - 1 ? `1px solid var(--color-border)` : "none" }}
                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.03)")}

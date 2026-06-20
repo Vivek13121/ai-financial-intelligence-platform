@@ -56,8 +56,8 @@ class FeedSource:
 # Adding a new source = adding one line here. No other code changes needed.
 FEED_SOURCES: list[FeedSource] = [
     FeedSource(
-        name="Reuters Business",
-        url="https://feeds.reuters.com/reuters/businessNews",
+        name="TheStreet",
+        url="https://www.thestreet.com/.rss/full/",
     ),
     FeedSource(
         name="Yahoo Finance",

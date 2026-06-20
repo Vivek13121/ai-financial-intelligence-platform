@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { API } from "../lib/api";
@@ -129,28 +130,7 @@ export function Company() {
     { name: "Negative", value: intel.sentiment_distribution.negative, color: "var(--color-negative)" },
   ];
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div
-          className="card-elevated p-3 rounded-lg shadow-xl"
-          style={{ fontSize: "11px", border: "1px solid var(--color-border)" }}
-        >
-          <p className="text-muted-foreground mb-1">{label}</p>
-          {payload.map((entry: any, i: number) => (
-            <div key={i} className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color || entry.stroke }} />
-              <span className="font-semibold num" style={{ color: entry.color || entry.stroke }}>
-                {typeof entry.value === "number" ? entry.value.toFixed(1) : entry.value}
-              </span>
-              <span className="text-muted-foreground">{entry.name}</span>
-            </div>
-          ))}
-        </div>
-      );
-    }
-    return null;
-  };
+
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300 pb-10">
@@ -416,3 +396,26 @@ export function Company() {
     </div>
   );
 }
+
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div
+        className="card-elevated p-3 rounded-lg shadow-xl"
+        style={{ fontSize: "11px", border: "1px solid var(--color-border)" }}
+      >
+        <p className="text-muted-foreground mb-1">{label}</p>
+        {payload.map((entry: any, i: number) => (
+          <div key={i} className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color || entry.stroke }} />
+            <span className="font-semibold num" style={{ color: entry.color || entry.stroke }}>
+              {typeof entry.value === "number" ? entry.value.toFixed(1) : entry.value}
+            </span>
+            <span className="text-muted-foreground">{entry.name}</span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+  return null;
+};

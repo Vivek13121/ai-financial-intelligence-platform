@@ -17,7 +17,7 @@ ENTITY_STOP_WORDS = {
     "It", "New", "Of", "On", "Or", "The", "This", "To", "With", "Why",
     "Market", "Markets", "News", "Stock", "Stocks", "Shares", "Update",
     "Breaking", "Today", "Wall Street", "Dow Jones", "Nasdaq", "S&P",
-    "Reuters", "Bloomberg", "CNBC", "Yahoo Finance",
+    "TheStreet", "Bloomberg", "CNBC", "Yahoo Finance",
     "AI", "Buy", "Sell", "Hold", "Strong Buy", "One", "Inc", "Corp",
     "Corporation", "Company", "Ltd", "LLC", "PLC", "Monday", "Tuesday",
     "Wednesday", "Thursday", "Friday", "Saturday", "Sunday",
