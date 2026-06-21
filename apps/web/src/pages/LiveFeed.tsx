@@ -17,7 +17,7 @@ export function LiveFeed() {
       {/* ── Page Header ──────────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 pb-6 mb-2 border-b" style={{ borderColor: "var(--color-border)" }}>
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-foreground font-display">
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground font-display">
             Live News Feed
           </h2>
           <p className="text-sm text-muted-foreground mt-1.5">Financial news ingested and processed in real-time.</p>
@@ -36,7 +36,7 @@ export function LiveFeed() {
         {isLoading ? (
           Array.from({ length: 15 }).map((_, i) => (
             <div key={i} className="flex items-start gap-4 p-4 border-b last:border-b-0 animate-pulse" style={{ borderColor: "var(--color-border)" }}>
-              <div className="w-[120px] flex flex-col gap-2">
+              <div className="w-20 sm:w-[120px] flex flex-col gap-2">
                 <div className="h-3 w-20 bg-white/5 rounded" />
                 <div className="h-2 w-16 bg-white/5 rounded" />
               </div>
@@ -68,7 +68,7 @@ function ArticleRow({ article }: { article: Article }) {
     >
       
       {/* ── Left Column: Source and Time ── */}
-      <div className="w-[120px] flex-shrink-0 flex flex-col gap-1.5 pt-0.5">
+      <div className="w-20 sm:w-[120px] flex-shrink-0 flex flex-col gap-1.5 pt-0.5 min-w-0">
         <span className="text-[10px] font-mono tracking-widest uppercase text-muted-foreground opacity-80 truncate">
           {article.source || "UNKNOWN"}
         </span>

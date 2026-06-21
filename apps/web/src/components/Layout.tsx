@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
-import { LayoutDashboard, Rss, BarChart3, Search } from "lucide-react";
+import { LayoutDashboard, Rss, BarChart3, Search, Menu, X } from "lucide-react";
 
 export function Layout() {
   const location = useLocation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = [
     { name: "Overview",   href: "/",          icon: LayoutDashboard },
@@ -12,18 +14,64 @@ export function Layout() {
   ];
 
   return (
-    <div className="flex h-screen bg-background text-foreground overflow-hidden">
+    <div className="flex h-screen bg-background text-foreground overflow-hidden flex-col lg:flex-row">
+      {/* ── Mobile Header ──────────────────────────────────────────────── */}
+      <header 
+        className="lg:hidden flex items-center justify-between px-4 py-3 border-b z-20 flex-shrink-0" 
+        style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-surface)" }}
+      >
+        <div className="flex items-center gap-2.5">
+          <span
+            className="block w-1 h-5 rounded-[2px] flex-shrink-0"
+            style={{
+              backgroundColor: "var(--color-accent)",
+              boxShadow: "0 0 10px var(--color-accent)"
+            }}
+          />
+          <span className="text-xl font-bold tracking-tight text-foreground font-display">
+            FinIntel
+          </span>
+        </div>
+        <button 
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
+          className="p-1.5 text-muted-foreground hover:text-foreground focus:outline-none rounded-md"
+        >
+          {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
+      </header>
+
+      {/* ── Mobile Overlay ─────────────────────────────────────────────── */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 z-30 lg:hidden backdrop-blur-sm transition-opacity"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       {/* ── Sidebar ─────────────────────────────────────────────────────── */}
       <aside
-        className="w-[260px] flex flex-col flex-shrink-0 z-10"
+        className={`fixed inset-y-0 left-0 z-40 w-[260px] transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 flex flex-col flex-shrink-0 ${
+          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
         style={{
           backgroundColor: "var(--color-surface)",
           borderRight: "1px solid var(--color-border)",
           boxShadow: "1px 0 40px rgba(0,0,0,0.3)"
         }}
       >
-        {/* Brand */}
-        <div className="px-6 py-7 flex-shrink-0 flex flex-col gap-1.5">
+        {/* Mobile Sidebar Header */}
+        <div className="flex lg:hidden px-5 py-4 items-center justify-between border-b" style={{ borderColor: "var(--color-border)" }}>
+          <div className="flex items-center gap-2">
+            <span className="block w-1 h-4 rounded-[2px] flex-shrink-0" style={{ backgroundColor: "var(--color-accent)", boxShadow: "0 0 10px var(--color-accent)" }} />
+            <span className="text-lg font-bold tracking-tight text-foreground font-display">FinIntel</span>
+          </div>
+          <button onClick={() => setIsMobileMenuOpen(false)} className="text-muted-foreground hover:text-foreground p-1">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Desktop Brand */}
+        <div className="hidden lg:flex px-6 py-7 flex-shrink-0 flex-col gap-1.5">
           <div className="flex items-center gap-2.5">
             <span
               className="block w-1 h-5 rounded-[2px] flex-shrink-0"
@@ -33,7 +81,7 @@ export function Layout() {
               }}
             />
             <span className="text-xl font-bold tracking-tight text-foreground font-display">
-              FinIntel AI
+              FinIntel
             </span>
           </div>
           <span className="text-[9px] text-muted-foreground uppercase tracking-[0.2em] font-medium pl-[14px] opacity-70">
@@ -42,8 +90,8 @@ export function Layout() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-3 overflow-y-auto space-y-0.5">
-          <div className="px-3 mb-3 mt-2">
+        <nav className="flex-1 px-3 py-4 lg:py-0 overflow-y-auto space-y-0.5">
+          <div className="px-3 mb-3 mt-2 lg:mt-0">
             <span className="text-[10px] font-bold tracking-[0.15em] uppercase text-muted-foreground opacity-60">Platform</span>
           </div>
 
@@ -54,6 +102,7 @@ export function Layout() {
               <Link
                 key={item.name}
                 to={item.href}
+                onClick={() => setIsMobileMenuOpen(false)}
                 className={`flex items-center gap-3.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 relative group ${
                   isActive
                     ? "bg-[rgba(91,141,239,0.08)] text-[var(--color-accent)]"
@@ -104,7 +153,7 @@ export function Layout() {
       </aside>
 
       {/* ── Main Content ─────────────────────────────────────────────────── */}
-      <main className="flex-1 overflow-y-auto p-8 relative">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-8 relative w-full">
         <Outlet />
       </main>
     </div>

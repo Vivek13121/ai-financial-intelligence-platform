@@ -105,7 +105,7 @@ export function Dashboard() {
         className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 pb-6 mb-2 border-b"
         style={{ borderColor: "var(--color-border)" }}
       >
-        <h2 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-3 font-display">
+        <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground flex flex-wrap items-center gap-2 md:gap-3 font-display">
           Financial Intelligence
           {/* Live pulse */}
           <span className="flex h-2 w-2 relative mb-1">
@@ -195,15 +195,15 @@ export function Dashboard() {
                   className="flex items-center justify-between py-[11px] border-b last:border-0"
                   style={{ borderColor: "var(--color-border)" }}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
                     <span
                       className="num text-[10px] font-mono font-medium text-muted-foreground w-4 flex-shrink-0"
                     >
                       {String(idx + 1).padStart(2, '0')}
                     </span>
-                    <span className="text-[13px] font-bold text-foreground tracking-wide">{company.company}</span>
+                    <span className="text-[13px] font-bold text-foreground tracking-wide truncate">{company.company}</span>
                   </div>
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-4 flex-shrink-0">
                     <span className="num text-[11px] text-muted-foreground">{company.mentions}</span>
                     <span
                       className="text-[11px] font-bold w-2 text-right"
@@ -250,7 +250,7 @@ export function Dashboard() {
               </div>
             )}
             <div>
-              <p className="text-lg font-bold" style={{ color: movementColor }}>{getMovementText()}</p>
+              <p className="text-base md:text-lg font-bold" style={{ color: movementColor }}>{getMovementText()}</p>
               <div className="text-xs text-muted-foreground mt-1.5 space-y-1">
                 <p>{getMovementSubtext()}</p>
                 <p>{getMovementPointsText()}</p>
@@ -290,10 +290,10 @@ export function Dashboard() {
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 flex-1">
-              <div className="card-elevated p-5 rounded-xl flex flex-col justify-start h-full">
+              <div className="card-elevated p-4 sm:p-5 rounded-xl flex flex-col justify-start h-full">
                 <span className="text-[10px] font-bold tracking-wider uppercase text-muted-foreground mb-2">Direction</span>
                 <span
-                  className="text-2xl font-bold tracking-tight"
+                  className="text-xl md:text-2xl font-bold tracking-tight"
                   style={{
                     color: latestRun.trend === "Improving"
                       ? "var(--color-positive)"
@@ -305,19 +305,19 @@ export function Dashboard() {
                   {latestRun.trend === "Improving" ? "Bullish" : latestRun.trend === "Declining" ? "Bearish" : "Neutral"}
                 </span>
               </div>
-              <div className="card-elevated p-5 rounded-xl flex flex-col justify-start h-full">
+              <div className="card-elevated p-4 sm:p-5 rounded-xl flex flex-col justify-start h-full">
                 <span className="text-[10px] font-bold tracking-wider uppercase text-muted-foreground mb-2">Expected Δ</span>
-                <span className="text-2xl font-bold tracking-tight text-foreground">
+                <span className="text-xl md:text-2xl font-bold tracking-tight text-foreground">
                   53.8%
                 </span>
               </div>
-              <div className="card-elevated p-5 rounded-xl flex flex-col justify-start h-full">
+              <div className="card-elevated p-4 sm:p-5 rounded-xl flex flex-col justify-start h-full">
                 <span className="text-[10px] font-bold tracking-wider uppercase text-muted-foreground mb-2">Confidence</span>
-                <span className="text-2xl font-bold tracking-tight text-foreground">
+                <span className="text-xl md:text-2xl font-bold tracking-tight text-foreground">
                   Medium
                 </span>
               </div>
-              <div className="card-elevated p-5 rounded-xl flex flex-col justify-start h-full">
+              <div className="card-elevated p-4 sm:p-5 rounded-xl flex flex-col justify-start h-full">
                 <span className="text-[10px] font-bold tracking-wider uppercase text-muted-foreground mb-2">Model Age</span>
                 <div className="flex items-center gap-1.5 text-foreground">
                   <RefreshCw className="w-4 h-4 flex-shrink-0 text-muted-foreground" />

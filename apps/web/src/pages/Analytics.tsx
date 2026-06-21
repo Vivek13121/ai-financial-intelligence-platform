@@ -42,13 +42,13 @@ export function Analytics() {
   return (
     <div className="space-y-6 animate-in fade-in duration-500 pb-10">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Sentiment Analytics</h2>
+        <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Sentiment Analytics</h2>
         <p className="text-muted-foreground mt-2">Deep historical tracking and thematic extraction.</p>
       </div>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Historical Sentiment Trend */}
-        <div className="glass-card p-6 rounded-xl col-span-2 h-[350px] flex flex-col border-white/5">
+        <div className="glass-card p-4 sm:p-6 rounded-xl col-span-full lg:col-span-2 h-[300px] sm:h-[350px] flex flex-col border-white/5">
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2"><Activity className="w-5 h-5 text-blue-400"/> Raw Volatility Trend (30 Days)</h3>
           {tsLoading ? <ChartSkeleton /> : tsData.length === 0 ? <EmptyState message="No historical timeseries data found" /> : (
             <ResponsiveContainer width="100%" height="100%">
@@ -64,7 +64,7 @@ export function Analytics() {
         </div>
 
         {/* Overall Distribution */}
-        <div className="glass-card p-6 rounded-xl flex flex-col border-white/5">
+        <div className="glass-card p-4 sm:p-6 rounded-xl col-span-full lg:col-span-1 flex flex-col border-white/5">
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2"><BarChart3 className="w-5 h-5 text-primary"/> Overall Distribution</h3>
           {statsLoading ? <ChartSkeleton /> : stats?.total_articles === 0 ? <EmptyState message="No sentiment data available" /> : (
             <ResponsiveContainer width="100%" height={250}>
@@ -82,7 +82,7 @@ export function Analytics() {
         </div>
 
         {/* Sentiment Timeline BarChart */}
-        <div className="glass-card p-6 rounded-xl col-span-2 h-[350px] flex flex-col border-white/5">
+        <div className="glass-card p-4 sm:p-6 rounded-xl col-span-full lg:col-span-2 h-[300px] sm:h-[350px] flex flex-col border-white/5">
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2"><Database className="w-5 h-5 text-emerald-400"/> Positive / Negative Timeline</h3>
           {tsLoading ? <ChartSkeleton /> : tsData.length === 0 ? <EmptyState message="No distribution data found" /> : (
             <ResponsiveContainer width="100%" height="100%">
@@ -100,7 +100,7 @@ export function Analytics() {
         </div>
 
         {/* Sentiment Heatmap */}
-        <div className="glass-card p-6 rounded-xl flex flex-col border-white/5 relative">
+        <div className="glass-card p-4 sm:p-6 rounded-xl col-span-full lg:col-span-1 flex flex-col border-white/5 relative">
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2"><TrendingUp className="w-5 h-5 text-amber-400"/> Sentiment Intensity</h3>
           <p className="text-sm text-muted-foreground mb-4 border-b border-white/10 pb-4">Daily density view over the last 30 days</p>
           <div className="flex flex-wrap gap-2.5 content-start flex-1 mt-2">
@@ -124,7 +124,7 @@ export function Analytics() {
         </div>
 
         {/* News Volume AreaChart */}
-        <div className="glass-card p-6 rounded-xl col-span-full md:col-span-1 lg:col-span-1 h-[350px] flex flex-col border-white/5">
+        <div className="glass-card p-4 sm:p-6 rounded-xl col-span-full lg:col-span-1 h-[300px] sm:h-[350px] flex flex-col border-white/5">
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2"><ListOrdered className="w-5 h-5 text-fuchsia-400"/> News Volume</h3>
           {tsLoading ? <ChartSkeleton /> : tsData.length === 0 ? <EmptyState message="No volume data" /> : (
             <ResponsiveContainer width="100%" height="100%">
@@ -146,10 +146,10 @@ export function Analytics() {
         </div>
 
         {/* Top Topics Panel */}
-        <div className="glass-card p-6 rounded-xl col-span-full md:col-span-2 lg:col-span-2 flex flex-col border-white/5 h-[350px]">
+        <div className="glass-card p-4 sm:p-6 rounded-xl col-span-full lg:col-span-2 flex flex-col border-white/5 min-h-[400px] sm:h-[350px]">
           <h3 className="text-lg font-semibold mb-6 flex items-center gap-2 shrink-0"><TargetIcon className="w-5 h-5 text-primary"/> Thematic Extraction (7 Days)</h3>
           {topicsLoading ? <ChartSkeleton /> : !topics || (topics.positive.length === 0 && topics.negative.length === 0) ? <EmptyState message="Not enough entities extracted yet" /> : (
-            <div className="grid sm:grid-cols-2 gap-8 flex-1 min-h-0">
+            <div className="grid sm:grid-cols-2 gap-6 sm:gap-8 flex-1 min-h-0">
               <div className="flex flex-col min-h-0">
                 <h4 className="text-emerald-400 font-medium mb-4 flex items-center gap-2 shrink-0">
                   <span className="w-2 h-2 rounded-full bg-emerald-400" /> Bullish Topics

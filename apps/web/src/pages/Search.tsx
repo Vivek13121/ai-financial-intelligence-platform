@@ -40,7 +40,7 @@ export function Search() {
   ];
 
   return (
-    <div className="animate-in fade-in duration-300 max-w-2xl mx-auto pt-12">
+    <div className="animate-in fade-in duration-300 max-w-2xl mx-auto pt-6 md:pt-12 px-2 sm:px-0">
 
       {/* Header */}
       <div className="mb-10">
@@ -50,7 +50,7 @@ export function Search() {
         >
           <SearchIcon className="w-5 h-5" style={{ color: "var(--color-accent)" }} />
         </div>
-        <h2 className="text-2xl font-bold tracking-tight text-foreground font-display mb-2">
+        <h2 className="text-xl md:text-2xl font-bold tracking-tight text-foreground font-display mb-2">
           Company Intelligence Search
         </h2>
         <p className="text-sm text-muted-foreground leading-relaxed">
@@ -133,9 +133,9 @@ export function Search() {
                 onMouseEnter={(e) => (e.currentTarget.style.color = "var(--color-accent)")}
                 onMouseLeave={(e) => (e.currentTarget.style.color = "")}
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 min-w-0">
                   <span
-                    className="num text-[10px] font-bold px-1.5 py-0.5 rounded"
+                    className="num text-[10px] font-bold px-1.5 py-0.5 rounded flex-shrink-0"
                     style={{
                       backgroundColor: "rgba(91,141,239,0.08)",
                       color: "var(--color-accent)",
@@ -144,10 +144,10 @@ export function Search() {
                   >
                     {company.ticker}
                   </span>
-                  <span className="text-sm font-medium text-foreground">{company.name}</span>
+                  <span className="text-sm font-medium text-foreground truncate">{company.name}</span>
                 </div>
                 <span
-                  className="num text-xs font-semibold"
+                  className="num text-xs font-semibold flex-shrink-0"
                   style={{ color: isPositive ? "var(--color-positive)" : "var(--color-negative)" }}
                 >
                   {company.trend}

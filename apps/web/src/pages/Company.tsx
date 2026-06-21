@@ -145,7 +145,7 @@ export function Company() {
           <ArrowLeft className="w-4 h-4" />
         </button>
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-foreground font-display">
+          <h2 className="text-xl md:text-2xl font-bold tracking-tight text-foreground font-display">
             {intel.company_name}
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5">Company Intelligence Report</p>
@@ -206,7 +206,7 @@ export function Company() {
       <div className="grid lg:grid-cols-3 gap-5">
 
         {/* Sentiment Trend */}
-        <div className="card p-5 lg:col-span-2 flex flex-col">
+        <div className="card p-5 col-span-full lg:col-span-2 flex flex-col">
           <h3 className="label-section mb-4">Historical Trend · 30 Days</h3>
           <div className="flex-1 min-h-[260px]">
             {tsData.length === 0 ? (
