@@ -8,6 +8,8 @@
 
 https://finintell.netlify.app/
 
+Note: The backend is hosted on Render's free tier and may require a short cold-start delay after periods of inactivity.
+
 ## Key Features
 
 * **Real-Time News Ingestion:** Automated aggregation of live financial feeds, structured and processed the moment news breaks.
