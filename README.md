@@ -88,12 +88,12 @@ The codebase is organized as a monorepo containing several independent applicati
 ![Analytics](docs/images/analytics_2.png)
 
 ### Company Intelligence
-![Company Intelligence](docs/images/search4.png)
+![Company Intelligence](docs/images/search3.png)
 
 ### Search
 ![Search](docs/images/company_search_1.png)
 ![Search](docs/images/search2.png)
-![Search](docs/images/search3.png)
+![Search](docs/images/search4.png)
 
 ---
 
