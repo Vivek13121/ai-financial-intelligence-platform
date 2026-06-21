@@ -18,14 +18,14 @@ export function AISummaryCard({ companyName }: AISummaryCardProps) {
   const [isExpanded, setIsExpanded] = useState(true);
 
   // Check if we have a cached summary
-  const { data: statusData, isLoading: statusLoading } = useQuery({
+  const { data: statusData } = useQuery({
     queryKey: ["ai-summary-status", companyName],
     queryFn: () => API.getAISummaryStatus(companyName),
     refetchInterval: 60000,
   });
 
   // Fetch the actual summary only if it's cached OR if user clicks Generate
-  const { data: summary, isLoading: summaryLoading, isError: summaryError, error } = useQuery<AISummaryResponse>({
+  const { data: summary, isError: summaryError, error } = useQuery<AISummaryResponse>({
     queryKey: ["ai-summary", companyName],
     queryFn: () => API.getAISummary(companyName),
     enabled: !!statusData?.is_cached,
